@@ -1,6 +1,7 @@
 // src/components/UnavailabilityList.tsx
 import React from 'react';
 import type { Unavailability, StaffMember } from '../types';
+import { timeToMinutes } from '../utils'; 
 import { DAYS_OF_WEEK } from '../config';
 
 interface UnavailabilityListProps {
@@ -79,22 +80,6 @@ function UnavailabilityList({ unavailabilityList, staffList, onDeleteUnavailabil
       )}
     </div>
   );
-}
-
- function timeToMinutes(timeStr: string): number {
-  if (!timeStr || !timeStr.includes(':')) return 0;
-  try {
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-        return hours * 60 + minutes;
-      } else {
-          console.warn(`timeToMinutes received out-of-range time: ${timeStr}`);
-          return 0; 
-      }
-  } catch {
-    console.warn(`timeToMinutes failed to parse time: ${timeStr}`);
-    return 0;
-  }
 }
 
 
