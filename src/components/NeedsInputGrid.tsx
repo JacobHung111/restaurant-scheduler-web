@@ -1,7 +1,6 @@
 // src/components/NeedsInputGrid.tsx
 import React from "react";
 import type { WeeklyNeeds } from "../types";
-// *** Corrected Import: Use SHIFT_KEYS instead of the non-existent constant ***
 import { DAYS_OF_WEEK, SHIFT_KEYS, ALL_ROLES } from "../config";
 
 interface NeedsInputGridProps {
@@ -35,7 +34,6 @@ function NeedsInputGrid({ weeklyNeeds, onNeedsChange }: NeedsInputGridProps) {
           <h4 className="text-md font-semibold mb-3 border-b pb-1 text-gray-800">
             {day}
           </h4>
-          {/* *** Corrected Usage: Iterate over SHIFT_KEYS *** */}
           {SHIFT_KEYS.map((shiftKey) => (
             <div key={shiftKey} className="shift-needs mb-3">
               <h5 className="text-sm font-medium mb-1 text-gray-600">

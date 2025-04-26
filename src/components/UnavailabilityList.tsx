@@ -50,7 +50,6 @@ function UnavailabilityList({
       const nameA = getStaffName(a.employeeId);
       const nameB = getStaffName(b.employeeId);
       if (nameA !== nameB) return nameA.localeCompare(nameB);
-      // Optional: Sort by day of week if names are the same
       const dayIndexA = DAYS_OF_WEEK.indexOf(a.dayOfWeek);
       const dayIndexB = DAYS_OF_WEEK.indexOf(b.dayOfWeek);
       return dayIndexA - dayIndexB;

@@ -9,8 +9,6 @@ interface ScheduleDisplayProps {
   staffList: StaffMember[];
 }
 
-// Processed schedule data structure remains the same:
-// { day: { employeeId: [{ shiftText, role }, ...] } }
 interface ProcessedSchedule {
   [day: string]: {
     [employeeId: string]: {
