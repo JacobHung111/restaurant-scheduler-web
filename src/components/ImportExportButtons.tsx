@@ -1,19 +1,25 @@
 // src/components/ImportExportButtons.tsx
-import React, { useRef } from 'react';
+import React, { useRef } from "react";
 
 interface ImportExportButtonsProps<T> {
-  dataType: string; 
-  dataToExport: T; 
+  dataType: string;
+  dataToExport: T;
   onDataImport: (importedData: T) => void;
 }
 
-function ImportExportButtons<T>({ dataType, dataToExport, onDataImport }: ImportExportButtonsProps<T>) {
+function ImportExportButtons<T>({
+  dataType,
+  dataToExport,
+  onDataImport,
+}: ImportExportButtonsProps<T>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
     const hasData = Array.isArray(dataToExport)
       ? dataToExport.length > 0
-      : typeof dataToExport === 'object' && dataToExport !== null && Object.keys(dataToExport).length > 0;
+      : typeof dataToExport === "object" &&
+        dataToExport !== null &&
+        Object.keys(dataToExport).length > 0;
 
     if (!hasData) {
       alert(`No ${dataType} data available to export.`);
@@ -22,11 +28,13 @@ function ImportExportButtons<T>({ dataType, dataToExport, onDataImport }: Import
 
     try {
       const jsonString = JSON.stringify(dataToExport, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
+      const blob = new Blob([jsonString], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      const fileName = `${dataType.toLowerCase().replace(/\s+/g, '_')}_data.json`;
+      const fileName = `${dataType
+        .toLowerCase()
+        .replace(/\s+/g, "_")}_data.json`;
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
@@ -47,9 +55,9 @@ function ImportExportButtons<T>({ dataType, dataToExport, onDataImport }: Import
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== 'application/json') {
-      alert('Please select a valid JSON file (.json).');
-      if(fileInputRef.current) fileInputRef.current.value = '';
+    if (file.type !== "application/json") {
+      alert("Please select a valid JSON file (.json).");
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
@@ -58,32 +66,37 @@ function ImportExportButtons<T>({ dataType, dataToExport, onDataImport }: Import
     reader.onload = (e) => {
       try {
         const result = e.target?.result;
-        if (typeof result !== 'string') {
-            throw new Error("Failed to read file content.");
+        if (typeof result !== "string") {
+          throw new Error("Failed to read file content.");
         }
         const importedData = JSON.parse(result);
 
-        if (importedData === null || typeof importedData === 'undefined') {
-             throw new Error("Imported JSON data is null or undefined.");
+        if (importedData === null || typeof importedData === "undefined") {
+          throw new Error("Imported JSON data is null or undefined.");
         }
-         console.log(`Successfully parsed imported ${dataType} data:`, importedData);
+        console.log(
+          `Successfully parsed imported ${dataType} data:`,
+          importedData
+        );
 
         onDataImport(importedData);
         alert(`${dataType} data imported successfully!`);
-
       } catch (error) {
         console.error(`Failed to import ${dataType} data:`, error);
-        const message = error instanceof Error ? error.message : "Unknown error during import.";
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unknown error during import.";
         alert(`Failed to import ${dataType} data: ${message}`);
       } finally {
-         if(fileInputRef.current) fileInputRef.current.value = '';
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     };
 
     reader.onerror = (e) => {
       console.error("Error reading file:", e);
       alert("Error reading the selected file.");
-       if(fileInputRef.current) fileInputRef.current.value = '';
+      if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     reader.readAsText(file);
@@ -96,7 +109,7 @@ function ImportExportButtons<T>({ dataType, dataToExport, onDataImport }: Import
         ref={fileInputRef}
         accept=".json"
         onChange={handleFileChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
       <button
         type="button"

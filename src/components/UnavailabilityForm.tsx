@@ -1,57 +1,59 @@
 // src/components/UnavailabilityForm.tsx
-import React, { useState } from 'react';
-import type { StaffMember, Unavailability, ShiftTime } from '../types';
-import { DAYS_OF_WEEK } from '../config';
+import React, { useState } from "react";
+import type { StaffMember, Unavailability, ShiftTime } from "../types";
+import { DAYS_OF_WEEK } from "../config";
 
 interface UnavailabilityFormProps {
   staffList: StaffMember[];
   onAddUnavailability: (newUnavData: Unavailability) => void;
 }
 
-
 const UNAVAILABLE_SHIFT_OPTIONS: ShiftTime[] = [
-    { start: "11:00", end: "16:00"},
-    { start: "16:00", end: "21:00"},
-    { start: "00:00", end: "23:59"}
+  { start: "11:00", end: "16:00" },
+  { start: "16:00", end: "21:00" },
+  { start: "00:00", end: "23:59" },
 ];
 
 const UNAVAILABLE_SHIFT_LABELS: { [key: string]: string } = {
-    "11:00-16:00": "11:00 - 16:00",
-    "16:00-21:00": "16:00 - 21:00",
-    "00:00-23:59": "All Day"
+  "11:00-16:00": "11:00 - 16:00",
+  "16:00-21:00": "16:00 - 21:00",
+  "00:00-23:59": "All Day",
 };
 
-
-function UnavailabilityForm({ staffList, onAddUnavailability }: UnavailabilityFormProps) {
-  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
-  const [selectedDay, setSelectedDay] = useState<string>('');
+function UnavailabilityForm({
+  staffList,
+  onAddUnavailability,
+}: UnavailabilityFormProps) {
+  const [selectedStaffId, setSelectedStaffId] = useState<string>("");
+  const [selectedDay, setSelectedDay] = useState<string>("");
   const [selectedShifts, setSelectedShifts] = useState<ShiftTime[]>([]);
 
   const handleShiftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
-    const [start, end] = value.split('-'); // value should be "HH:MM-HH:MM" format
+    const [start, end] = value.split("-"); // value should be "HH:MM-HH:MM" format
     const shiftObj = { start, end };
 
-    setSelectedShifts(prevShifts =>
+    setSelectedShifts((prevShifts) =>
       checked
         ? [...prevShifts, shiftObj]
-        : prevShifts.filter(s => !(s.start === start && s.end === end))
+        : prevShifts.filter((s) => !(s.start === start && s.end === end))
     );
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedStaffId || !selectedDay || selectedShifts.length === 0) {
-      alert('Please select staff, day, and at least one unavailable shift.');
+      alert("Please select staff, day, and at least one unavailable shift.");
       return;
     }
 
     // Check if all-day shift is selected
-    const isAllDaySelected = selectedShifts.some(s => s.start === "00:00" && s.end === "23:59");
+    const isAllDaySelected = selectedShifts.some(
+      (s) => s.start === "00:00" && s.end === "23:59"
+    );
     const finalShifts = isAllDaySelected
       ? [{ start: "00:00", end: "23:59" }]
       : selectedShifts;
-
 
     const newUnavData: Unavailability = {
       employeeId: selectedStaffId,
@@ -62,24 +64,33 @@ function UnavailabilityForm({ staffList, onAddUnavailability }: UnavailabilityFo
     onAddUnavailability(newUnavData);
 
     // Reset form
-    setSelectedStaffId('');
-    setSelectedDay('');
+    setSelectedStaffId("");
+    setSelectedDay("");
     setSelectedShifts([]);
     // Reset checkboxes and selects in the form
-     const form = event.target as HTMLFormElement;
-     form.querySelectorAll('input[type="checkbox"]').forEach(cb => (cb as HTMLInputElement).checked = false);
-     const selects = form.querySelectorAll('select');
-     if(selects[0]) selects[0].selectedIndex = 0; // Reset staff select
-     if(selects[1]) selects[1].selectedIndex = 0; // Reset day select
+    const form = event.target as HTMLFormElement;
+    form
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach((cb) => ((cb as HTMLInputElement).checked = false));
+    const selects = form.querySelectorAll("select");
+    if (selects[0]) selects[0].selectedIndex = 0; // Reset staff select
+    if (selects[1]) selects[1].selectedIndex = 0; // Reset day select
   };
 
   return (
     <div className="p-4 border border-gray-200 rounded shadow-sm bg-gray-50 mb-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-700">Add Staff Unavailability</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-700">
+        Add Staff Unavailability
+      </h3>
       <form onSubmit={handleSubmit}>
         {/* Staff Selection */}
         <div className="mb-4">
-          <label htmlFor="unav-staff-select-form" className="block text-sm font-medium text-gray-700 mb-1">Select Staff:</label>
+          <label
+            htmlFor="unav-staff-select-form"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Select Staff:
+          </label>
           <select
             id="unav-staff-select-form"
             value={selectedStaffId}
@@ -87,8 +98,10 @@ function UnavailabilityForm({ staffList, onAddUnavailability }: UnavailabilityFo
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white" // Added bg-white for select
           >
-            <option value="" disabled>-- Select Staff --</option>
-            {staffList.map(staff => (
+            <option value="" disabled>
+              -- Select Staff --
+            </option>
+            {staffList.map((staff) => (
               <option key={staff.id} value={staff.id}>
                 {staff.name} ({staff.id})
               </option>
@@ -98,7 +111,12 @@ function UnavailabilityForm({ staffList, onAddUnavailability }: UnavailabilityFo
 
         {/* Day Selection */}
         <div className="mb-4">
-          <label htmlFor="unav-day-select-form" className="block text-sm font-medium text-gray-700 mb-1">Select Day:</label>
+          <label
+            htmlFor="unav-day-select-form"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Select Day:
+          </label>
           <select
             id="unav-day-select-form"
             value={selectedDay}
@@ -106,38 +124,53 @@ function UnavailabilityForm({ staffList, onAddUnavailability }: UnavailabilityFo
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white"
           >
-            <option value="" disabled>-- Select Day --</option>
-            {DAYS_OF_WEEK.map(day => (
-              <option key={day} value={day}>{day}</option>
+            <option value="" disabled>
+              -- Select Day --
+            </option>
+            {DAYS_OF_WEEK.map((day) => (
+              <option key={day} value={day}>
+                {day}
+              </option>
             ))}
           </select>
         </div>
 
         {/* Shift Selection */}
         <div className="mb-4">
-           <label className="block text-sm font-medium text-gray-700 mb-1">Select Unavailable Shifts:</label>
-           <div className="space-x-4 flex flex-wrap gap-y-2">
-             {UNAVAILABLE_SHIFT_OPTIONS.map(shiftOpt => {
-               const shiftValue = `${shiftOpt.start}-${shiftOpt.end}`;
-               const shiftLabel = UNAVAILABLE_SHIFT_LABELS[shiftValue] || shiftValue;
-               return (
-                 <span key={shiftValue} className="inline-flex items-center">
-                   <input
-                     type="checkbox"
-                     id={`unav-${shiftValue}-form`}
-                     name="unav-shift-form"
-                     value={shiftValue}
-                     // Checked state needs to compare objects or use string representation
-                     checked={selectedShifts.some(s => s.start === shiftOpt.start && s.end === shiftOpt.end)}
-                     onChange={handleShiftChange}
-                     className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                   />
-                   <label htmlFor={`unav-${shiftValue}-form`} className="ml-2 block text-sm text-gray-900">{shiftLabel}</label>
-                 </span>
-               );
-             })}
-           </div>
-         </div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Unavailable Shifts:
+          </label>
+          <div className="space-x-4 flex flex-wrap gap-y-2">
+            {UNAVAILABLE_SHIFT_OPTIONS.map((shiftOpt) => {
+              const shiftValue = `${shiftOpt.start}-${shiftOpt.end}`;
+              const shiftLabel =
+                UNAVAILABLE_SHIFT_LABELS[shiftValue] || shiftValue;
+              return (
+                <span key={shiftValue} className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`unav-${shiftValue}-form`}
+                    name="unav-shift-form"
+                    value={shiftValue}
+                    // Checked state needs to compare objects or use string representation
+                    checked={selectedShifts.some(
+                      (s) =>
+                        s.start === shiftOpt.start && s.end === shiftOpt.end
+                    )}
+                    onChange={handleShiftChange}
+                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <label
+                    htmlFor={`unav-${shiftValue}-form`}
+                    className="ml-2 block text-sm text-gray-900"
+                  >
+                    {shiftLabel}
+                  </label>
+                </span>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Submit Button */}
         <button
