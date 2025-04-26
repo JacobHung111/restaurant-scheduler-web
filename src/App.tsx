@@ -1,11 +1,9 @@
 // src/App.tsx
 import { useState, useCallback } from "react";
-import StaffForm from "./components/StaffForm";
-import StaffList from "./components/StaffList";
-import UnavailabilityForm from "./components/UnavailabilityForm";
-import UnavailabilityList from "./components/UnavailabilityList";
-import NeedsInputGrid from "./components/NeedsInputGrid";
-import ImportExportButtons from "./components/ImportExportButtons";
+import { Tab } from "@headlessui/react";
+import StaffPanel from "./components/StaffPanel";
+import UnavailabilityPanel from "./components/UnavailabilityPanel";
+import NeedsPanel from "./components/NeedsPanel";
 import ScheduleDisplay from "./components/ScheduleDisplay";
 import type {
   StaffMember,
@@ -16,6 +14,10 @@ import type {
 import { generateScheduleAPI } from "./api/scheduleApi";
 import { DAYS_OF_WEEK, SHIFT_KEYS, ALL_ROLES } from "./config";
 import "./index.css";
+
+function classNames(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 function App() {
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
@@ -31,6 +33,7 @@ function App() {
   const [shiftPreference, setShiftPreference] = useState<
     "PRIORITIZE_FULL_DAYS" | "PRIORITIZE_HALF_DAYS" | "NONE"
   >("PRIORITIZE_FULL_DAYS");
+
   const handleAddStaff = (newStaffData: Omit<StaffMember, "id">) => {
     const generatedId = `S${Date.now()}-${staffIdCounter}`;
     setStaffIdCounter((prev) => prev + 1);
@@ -336,110 +339,124 @@ function App() {
     }
   }, []);
 
+  const handleClearNeeds = useCallback(() => {
+    if (confirm("Are you sure you want to clear all weekly needs?")) {
+      setWeeklyNeeds({});
+      console.log("Weekly needs cleared.");
+    }
+  }, []);
+
   return (
     <div className="container mx-auto p-4 lg:p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
         Restaurant Weekly Schedule Generator
       </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        <div className="lg:col-span-1 space-y-6">
-          {/* Staff Management Section */}
-          <ImportExportButtons
-            dataType="Staff"
-            dataToExport={staffList}
-            onDataImport={handleImportStaff}
-          />
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">
-              Staff Management
-            </h2>
-            {/* --- Render Staff Components --- */}
-            <StaffForm onAddStaff={handleAddStaff} />
-            <StaffList
+      {/* --- Tabs 結構 --- */}
+      <Tab.Group>
+        {/* --- 標籤按鈕列表 --- */}
+        <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1 mb-6">
+          {["Staff", "Unavailability", "Needs"].map((category) => (
+            <Tab
+              key={category}
+              className={({ selected }) =>
+                classNames(
+                  "w-full rounded-lg py-2.5 text-sm font-medium leading-5",
+                  "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2",
+                  selected
+                    ? "bg-white text-blue-700 shadow" // 選中時的樣式
+                    : "text-blue-100 hover:bg-white/[0.12] hover:text-white" // 未選中時的樣式
+                )
+              }
+            >
+              {category}
+            </Tab>
+          ))}
+        </Tab.List>
+
+        {/* --- 標籤面板內容 --- */}
+        <Tab.Panels className="mt-2">
+          {/* 員工面板 */}
+          <Tab.Panel
+            className={classNames(
+              "rounded-xl bg-white p-3", // 添加一些基本樣式
+              "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
+            )}
+          >
+            <StaffPanel
               staffList={staffList}
+              onAddStaff={handleAddStaff}
               onDeleteStaff={handleDeleteStaff}
               onReorderStaff={handleReorderStaff}
+              onImportStaff={handleImportStaff}
             />
-            {/* --- End Render Staff Components --- */}
-          </div>
-          {/* Unavailability Section */}
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">
-              Staff Unavailability
-            </h2>
-            <ImportExportButtons
-              dataType="Unavailability"
-              dataToExport={unavailabilityList}
-              onDataImport={handleImportUnavailability}
-            />
-            {/* --- Render Unavailability Components --- */}
-            <UnavailabilityForm
-              staffList={staffList}
-              onAddUnavailability={handleAddUnavailability}
-            />
-            <UnavailabilityList
-              unavailabilityList={unavailabilityList}
-              staffList={staffList}
-              onDeleteUnavailability={handleDeleteUnavailability}
-            />
-            {/* --- End Render Unavailability Components --- */}
-          </div>
-          {/* --- Optimization Settings Section --- */}
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">
-              Optimization Settings
-            </h2>
-            <div className="mb-4">
-              <label
-                htmlFor="shift-pref-select"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Shift Preference:
-              </label>
-              <select
-                id="shift-pref-select"
-                value={shiftPreference}
-                onChange={(e) => setShiftPreference(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white"
-              >
-                <option value="PRIORITIZE_FULL_DAYS">
-                  Prioritize Full Days
-                </option>
-                <option value="PRIORITIZE_HALF_DAYS">
-                  Prioritize Half Days
-                </option>
-                <option value="NONE">No Preference</option>
-              </select>
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Staff priority is now determined by the order in the Staff List
-              above (drag to reorder).
-            </p>
-          </div>
-        </div>
+          </Tab.Panel>
 
-        {/* Needs Section Placeholder */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">
-              Needs Section
-            </h2>
-            <ImportExportButtons
-              dataType="Weekly Needs"
-              dataToExport={weeklyNeeds}
-              onDataImport={handleImportNeeds}
+          {/* 不可用時間面板 */}
+          <Tab.Panel
+            className={classNames(
+              "rounded-xl bg-white p-3",
+              "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
+            )}
+          >
+            <UnavailabilityPanel
+              staffList={staffList}
+              unavailabilityList={unavailabilityList}
+              onAddUnavailability={handleAddUnavailability}
+              onDeleteUnavailability={handleDeleteUnavailability}
+              onImportUnavailability={handleImportUnavailability}
             />
-            <NeedsInputGrid
+          </Tab.Panel>
+
+          {/* 需求面板 */}
+          <Tab.Panel
+            className={classNames(
+              "rounded-xl bg-white p-3",
+              "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
+            )}
+          >
+            <NeedsPanel
               weeklyNeeds={weeklyNeeds}
               onNeedsChange={handleNeedsChange}
+              onImportNeeds={handleImportNeeds}
+              onClearNeeds={handleClearNeeds} // Pass clear handler
             />
-          </div>
-        </div>
-      </div>
+          </Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
+      {/* --- Tabs 結構結束 --- */}
 
-      {/* Control and Output Section Placeholders */}
       <div className="mt-8 space-y-6">
+        {/* --- Optimization Settings Section --- */}
+        <div className="p-4 bg-white rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Optimization Settings
+          </h2>
+          {/* --- Shift Preference Select  --- */}
+          <div className="mb-4">
+            <label
+              htmlFor="shift-pref-select"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Shift Preference:
+            </label>
+            <select
+              id="shift-pref-select"
+              value={shiftPreference}
+              onChange={(e) => setShiftPreference(e.target.value as any)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white"
+            >
+              <option value="PRIORITIZE_FULL_DAYS">Prioritize Full Days</option>
+              <option value="PRIORITIZE_HALF_DAYS">Prioritize Half Days</option>
+              <option value="NONE">No Preference</option>
+            </select>
+          </div>
+          <p className="mt-1 text-xs text-gray-500">
+            Staff priority is now determined by the order in the Staff List
+            above (drag to reorder).
+          </p>
+        </div>
+        {/* Control and Output Section Placeholders */}
         <div className="p-4 bg-white rounded-lg shadow text-center">
           <button
             onClick={handleGenerateSchedule}
@@ -452,11 +469,6 @@ function App() {
           >
             {isLoading ? "Is Loading..." : "Generated Schedule"}
           </button>
-        </div>
-        <div className="p-4 bg-white rounded-lg shadow min-h-[200px]">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            Generate Schedule Result
-          </h2>
           {isLoading && (
             <p className="text-center text-blue-600 animate-pulse">
               Waiting the result from Web Server...
