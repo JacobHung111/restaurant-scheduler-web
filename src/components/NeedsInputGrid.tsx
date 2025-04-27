@@ -29,45 +29,50 @@ function NeedsInputGrid({ weeklyNeeds, onNeedsChange }: NeedsInputGridProps) {
       {DAYS_OF_WEEK.map((day) => (
         <div
           key={day}
-          className="day-needs border border-gray-200 p-3 rounded bg-white shadow-sm"
+          className="day-needs border border-gray-200 p-4 rounded-lg bg-white shadow-sm"
         >
-          <h4 className="text-md font-semibold mb-3 border-b pb-1 text-gray-800">
+          <h4 className="text-md font-semibold mb-3 border-b border-gray-200 pb-2 text-center text-gray-800">
             {day}
           </h4>
-          {SHIFT_KEYS.map((shiftKey) => (
-            <div key={shiftKey} className="shift-needs mb-3">
-              <h5 className="text-sm font-medium mb-1 text-gray-600">
-                {shiftKey}
-              </h5>
-              {ALL_ROLES.map((role) => {
-                const inputId = `needs_${day}_${shiftKey}_${role}`;
-                const currentValue = weeklyNeeds[day]?.[shiftKey]?.[role] ?? 0;
-                return (
-                  <div
-                    key={role}
-                    className="flex items-center justify-between mb-1"
-                  >
-                    <label
-                      htmlFor={inputId}
-                      className="text-xs text-gray-700 w-16 text-right mr-2"
-                    >
-                      {role}:
-                    </label>
-                    <input
-                      type="number"
-                      id={inputId}
-                      name={inputId}
-                      value={currentValue}
-                      onChange={handleInputChange}
-                      min="0"
-                      step="1"
-                      className="w-16 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-xs text-center"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+          <div className="space-y-4">
+            {SHIFT_KEYS.map((shiftKey) => (
+              <div key={shiftKey} className="shift-needs">
+                <h5 className="text-sm font-medium mb-2 text-center text-gray-500">
+                  {shiftKey}
+                </h5>
+                <div className="space-y-1">
+                  {ALL_ROLES.map((role) => {
+                    const inputId = `needs_${day}_${shiftKey}_${role}`;
+                    const currentValue =
+                      weeklyNeeds[day]?.[shiftKey]?.[role] ?? 0;
+                    return (
+                      <div
+                        key={role}
+                        className="flex items-center justify-center mb-1"
+                      >
+                        <label
+                          htmlFor={inputId}
+                          className="text-xs text-gray-600 w-14 text-right mr-2 shrink-0"
+                        >
+                          {role}:
+                        </label>
+                        <input
+                          type="number"
+                          id={inputId}
+                          name={inputId}
+                          value={currentValue}
+                          onChange={handleInputChange}
+                          min="0"
+                          step="1"
+                          className="w-16 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-center transition duration-150 ease-in-out hover:border-gray-400"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>

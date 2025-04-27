@@ -1,3 +1,4 @@
+// src/components/UnavailabilityPanel.tsx
 import type { StaffMember, Unavailability } from "../types";
 import UnavailabilityForm from "./UnavailabilityForm";
 import UnavailabilityList from "./UnavailabilityList";

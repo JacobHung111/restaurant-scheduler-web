@@ -13,7 +13,6 @@ const UNAVAILABLE_SHIFT_OPTIONS: ShiftTime[] = [
   { start: "16:00", end: "21:00" },
   { start: "00:00", end: "23:59" },
 ];
-
 const UNAVAILABLE_SHIFT_LABELS: { [key: string]: string } = {
   "11:00-16:00": "11:00 - 16:00",
   "16:00-21:00": "16:00 - 21:00",
@@ -30,9 +29,9 @@ function UnavailabilityForm({
 
   const handleShiftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
-    const [start, end] = value.split("-"); // value should be "HH:MM-HH:MM" format
+    const [start, end] = value.split("-");
+    if (!start || !end) return;
     const shiftObj = { start, end };
-
     setSelectedShifts((prevShifts) =>
       checked
         ? [...prevShifts, shiftObj]
@@ -46,45 +45,33 @@ function UnavailabilityForm({
       alert("Please select staff, day, and at least one unavailable shift.");
       return;
     }
-
-    // Check if all-day shift is selected
     const isAllDaySelected = selectedShifts.some(
       (s) => s.start === "00:00" && s.end === "23:59"
     );
     const finalShifts = isAllDaySelected
       ? [{ start: "00:00", end: "23:59" }]
       : selectedShifts;
-
     const newUnavData: Unavailability = {
       employeeId: selectedStaffId,
       dayOfWeek: selectedDay,
       shifts: finalShifts,
     };
-
     onAddUnavailability(newUnavData);
-
-    // Reset form
     setSelectedStaffId("");
     setSelectedDay("");
     setSelectedShifts([]);
-    // Reset checkboxes and selects in the form
     const form = event.target as HTMLFormElement;
     form
       .querySelectorAll('input[type="checkbox"]')
       .forEach((cb) => ((cb as HTMLInputElement).checked = false));
-    const selects = form.querySelectorAll("select");
-    if (selects[0]) selects[0].selectedIndex = 0; // Reset staff select
-    if (selects[1]) selects[1].selectedIndex = 0; // Reset day select
+    form.querySelectorAll("select").forEach((sel) => (sel.selectedIndex = 0));
   };
 
   return (
-    <div className="p-4 border border-gray-200 rounded shadow-sm bg-gray-50 mb-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-700">
-        Add Staff Unavailability
-      </h3>
-      <form onSubmit={handleSubmit}>
+    <div className="mb-6">
+      <form onSubmit={handleSubmit} className="space-y-4 mt-4">
         {/* Staff Selection */}
-        <div className="mb-4">
+        <div>
           <label
             htmlFor="unav-staff-select-form"
             className="block text-sm font-medium text-gray-700 mb-1"
@@ -96,7 +83,7 @@ function UnavailabilityForm({
             value={selectedStaffId}
             onChange={(e) => setSelectedStaffId(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white" // Added bg-white for select
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white"
           >
             <option value="" disabled>
               -- Select Staff --
@@ -110,7 +97,7 @@ function UnavailabilityForm({
         </div>
 
         {/* Day Selection */}
-        <div className="mb-4">
+        <div>
           <label
             htmlFor="unav-day-select-form"
             className="block text-sm font-medium text-gray-700 mb-1"
@@ -122,7 +109,7 @@ function UnavailabilityForm({
             value={selectedDay}
             onChange={(e) => setSelectedDay(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white"
           >
             <option value="" disabled>
               -- Select Day --
@@ -136,29 +123,28 @@ function UnavailabilityForm({
         </div>
 
         {/* Shift Selection */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Unavailable Shifts:
           </label>
-          <div className="space-x-4 flex flex-wrap gap-y-2">
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
             {UNAVAILABLE_SHIFT_OPTIONS.map((shiftOpt) => {
               const shiftValue = `${shiftOpt.start}-${shiftOpt.end}`;
               const shiftLabel =
                 UNAVAILABLE_SHIFT_LABELS[shiftValue] || shiftValue;
               return (
-                <span key={shiftValue} className="inline-flex items-center">
+                <div key={shiftValue} className="flex items-center">
                   <input
                     type="checkbox"
                     id={`unav-${shiftValue}-form`}
                     name="unav-shift-form"
                     value={shiftValue}
-                    // Checked state needs to compare objects or use string representation
                     checked={selectedShifts.some(
                       (s) =>
                         s.start === shiftOpt.start && s.end === shiftOpt.end
                     )}
                     onChange={handleShiftChange}
-                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
                   <label
                     htmlFor={`unav-${shiftValue}-form`}
@@ -166,22 +152,23 @@ function UnavailabilityForm({
                   >
                     {shiftLabel}
                   </label>
-                </span>
+                </div>
               );
             })}
           </div>
         </div>
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Add Unavailability
-        </button>
+        <div>
+          <button
+            type="submit"
+            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+          >
+            Add Unavailability
+          </button>
+        </div>
       </form>
     </div>
   );
 }
-
 export default UnavailabilityForm;

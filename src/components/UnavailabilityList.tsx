@@ -1,5 +1,4 @@
 // src/components/UnavailabilityList.tsx
-import React from "react";
 import type { Unavailability, StaffMember } from "../types";
 import { timeToMinutes } from "../utils";
 import { DAYS_OF_WEEK } from "../config";
@@ -7,7 +6,6 @@ import { DAYS_OF_WEEK } from "../config";
 interface UnavailabilityListProps {
   unavailabilityList: Unavailability[];
   staffList: StaffMember[];
-  // Function to delete all entries for a specific employee on a specific day
   onDeleteUnavailability: (employeeId: string, dayOfWeek: string) => void;
 }
 
@@ -57,49 +55,56 @@ function UnavailabilityList({
   );
 
   return (
-    <div className="mt-6">
-      <h3 className="text-lg font-semibold mb-2 text-gray-700">
-        Unavailability List:
+    <div className="mt-6 border-t border-gray-200 pt-4">
+      <h3 className="text-lg font-semibold mb-3 text-gray-700">
+        Unavailability List ({sortedGroupedItems.length}):
       </h3>
       {sortedGroupedItems.length === 0 ? (
-        <p className="text-sm text-gray-500">No unavailability added yet.</p>
+        <p className="text-sm text-gray-500 italic">
+          No unavailability added yet.
+        </p>
       ) : (
-        <ul className="space-y-2">
-          {sortedGroupedItems.map((item) => {
-            const shiftTexts = item.shifts
-              .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start)) // Sort shifts within the day
-              .map((s) =>
-                s.start === "00:00" && s.end === "23:59"
-                  ? "All Day"
-                  : `${s.start}-${s.end}`
-              )
-              .join(", ");
-            const staffName = getStaffName(item.employeeId);
-            return (
-              <li
-                key={`${item.employeeId}_${item.dayOfWeek}`}
-                className="flex items-center justify-between p-3 bg-gray-100 rounded border border-gray-200"
-              >
-                <span className="text-sm text-gray-800">
-                  <strong className="font-medium">{staffName}</strong> -{" "}
-                  {item.dayOfWeek}
-                  <br />
-                  <span className="text-xs text-gray-600">
-                    Unavailable: {shiftTexts}
-                  </span>
-                </span>
-                <button
-                  onClick={() =>
-                    onDeleteUnavailability(item.employeeId, item.dayOfWeek)
-                  }
-                  className="ml-4 px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500"
+        <div className="flow-root">
+          <ul role="list" className="space-y-2">
+            {sortedGroupedItems.map((item) => {
+              const shiftTexts = item.shifts
+                .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start))
+                .map((s) =>
+                  s.start === "00:00" && s.end === "23:59"
+                    ? "All Day"
+                    : `${s.start}-${s.end}`
+                )
+                .join(", ");
+              const staffName = getStaffName(item.employeeId);
+              return (
+                <li
+                  key={`${item.employeeId}_${item.dayOfWeek}`}
+                  className="flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:bg-gray-50 transition duration-150 ease-in-out shadow-sm"
                 >
-                  Delete Day Entry
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                  <span className="text-sm text-gray-800">
+                    <strong className="font-medium text-gray-900">
+                      {staffName}
+                    </strong>{" "}
+                    - {item.dayOfWeek}
+                    <br />
+                    <span className="text-xs text-gray-500">
+                      Unavailable: {shiftTexts}
+                    </span>
+                  </span>
+                  <button
+                    onClick={() =>
+                      onDeleteUnavailability(item.employeeId, item.dayOfWeek)
+                    }
+                    className="ml-4 px-2.5 py-1 text-xs font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 flex-shrink-0 transition duration-150 ease-in-out"
+                    aria-label={`Delete unavailability for ${staffName} on ${item.dayOfWeek}`}
+                  >
+                    Delete
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </div>
   );

@@ -20,25 +20,27 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.8 : 1,
+    transition: transition || "transform 150ms ease",
+    opacity: isDragging ? 0.75 : 1,
     zIndex: isDragging ? 10 : "auto",
-    cursor: isDragging ? "grabbing" : "grab",
   };
 
   return (
     <li
       ref={setNodeRef}
       style={style}
-      className={`flex items-center justify-between p-3 bg-gray-100 rounded border border-gray-200 ${
-        isDragging ? "shadow-lg" : ""
+      className={`flex items-center justify-between p-3 rounded border border-gray-200 transition-shadow duration-150 ease-in-out ${
+        isDragging
+          ? "shadow-lg bg-white opacity-75"
+          : "bg-white hover:bg-gray-50"
       }`}
+      {...attributes}
     >
+      {/* Drag Handle */}
       <button
-        {...attributes}
         {...listeners}
         type="button"
-        className="p-1 cursor-grab mr-2 text-gray-500 hover:text-gray-700"
+        className="p-1 cursor-grab text-gray-400 hover:text-gray-600 mr-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded" // Added focus style
         aria-label="Drag to reorder"
       >
         <svg
@@ -54,29 +56,47 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
             strokeLinejoin="round"
             d="M3.75 9h16.5m-16.5 6.75h16.5"
           />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3.75 6.75h16.5m-16.5 6.75h16.5m-16.5 6.75h16.5"
+          />{" "}
+          {/* Added more lines for grip */}
         </svg>
       </button>
 
-      <span className="text-sm text-gray-800 flex-grow">
-        <strong className="font-medium">{staff.name}</strong>{" "}
-        <span className="staff-id-display text-xs text-gray-500">
-          ({staff.id})
-        </span>
-        <br />
-        <span className="text-xs text-gray-600">
-          Roles: {staff.roles.join(", ")}
-          {staff.minHoursPerWeek != null
-            ? ` | Min: ${staff.minHoursPerWeek}h`
-            : ""}
-          {staff.maxHoursPerWeek != null
-            ? ` | Max: ${staff.maxHoursPerWeek}h`
-            : ""}
-        </span>
-      </span>
+      {/* Staff Info */}
+      <div className="text-sm text-gray-800 flex-grow mr-2">
+        <div className="font-medium text-gray-900">
+          {staff.name}{" "}
+          <span className="staff-id-display text-xs text-gray-400">
+            ({staff.id})
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 mt-0.5">
+          <span className="font-medium">Roles:</span> {staff.roles.join(", ")}
+          {staff.minHoursPerWeek != null ? (
+            <span className="ml-2">
+              <span className="font-medium">Min:</span> {staff.minHoursPerWeek}h
+            </span>
+          ) : (
+            ""
+          )}
+          {staff.maxHoursPerWeek != null ? (
+            <span className="ml-2">
+              <span className="font-medium">Max:</span> {staff.maxHoursPerWeek}h
+            </span>
+          ) : (
+            ""
+          )}
+        </div>
+      </div>
 
+      {/* Delete Button */}
       <button
         onClick={() => onDeleteStaff(staff.id)}
-        className="ml-4 px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 flex-shrink-0" // flex-shrink-0 防止按鈕縮小
+        className="ml-auto px-2.5 py-1 text-xs font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 flex-shrink-0 transition duration-150 ease-in-out" // Added transition
+        aria-label={`Delete ${staff.name}`}
       >
         Delete
       </button>

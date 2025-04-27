@@ -339,22 +339,13 @@ function App() {
     }
   }, []);
 
-  const handleClearNeeds = useCallback(() => {
-    if (confirm("Are you sure you want to clear all weekly needs?")) {
-      setWeeklyNeeds({});
-      console.log("Weekly needs cleared.");
-    }
-  }, []);
-
   return (
     <div className="container mx-auto p-4 lg:p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
         Restaurant Weekly Schedule Generator
       </h1>
 
-      {/* --- Tabs 結構 --- */}
       <Tab.Group>
-        {/* --- 標籤按鈕列表 --- */}
         <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1 mb-6">
           {["Staff", "Unavailability", "Needs"].map((category) => (
             <Tab
@@ -364,8 +355,8 @@ function App() {
                   "w-full rounded-lg py-2.5 text-sm font-medium leading-5",
                   "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2",
                   selected
-                    ? "bg-white text-blue-700 shadow" // 選中時的樣式
-                    : "text-blue-100 hover:bg-white/[0.12] hover:text-white" // 未選中時的樣式
+                    ? "bg-white text-blue-700 shadow"
+                    : "text-blue-100 hover:bg-white/[0.12] hover:text-white"
                 )
               }
             >
@@ -374,12 +365,10 @@ function App() {
           ))}
         </Tab.List>
 
-        {/* --- 標籤面板內容 --- */}
         <Tab.Panels className="mt-2">
-          {/* 員工面板 */}
           <Tab.Panel
             className={classNames(
-              "rounded-xl bg-white p-3", // 添加一些基本樣式
+              "rounded-xl bg-white p-3",
               "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
             )}
           >
@@ -392,7 +381,6 @@ function App() {
             />
           </Tab.Panel>
 
-          {/* 不可用時間面板 */}
           <Tab.Panel
             className={classNames(
               "rounded-xl bg-white p-3",
@@ -408,7 +396,6 @@ function App() {
             />
           </Tab.Panel>
 
-          {/* 需求面板 */}
           <Tab.Panel
             className={classNames(
               "rounded-xl bg-white p-3",
@@ -419,12 +406,10 @@ function App() {
               weeklyNeeds={weeklyNeeds}
               onNeedsChange={handleNeedsChange}
               onImportNeeds={handleImportNeeds}
-              onClearNeeds={handleClearNeeds} // Pass clear handler
             />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
-      {/* --- Tabs 結構結束 --- */}
 
       <div className="mt-8 space-y-6">
         {/* --- Optimization Settings Section --- */}

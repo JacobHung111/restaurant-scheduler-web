@@ -1,3 +1,4 @@
+// src/components/StaffPanel.tsx
 import type { StaffMember } from "../types";
 import StaffForm from "./StaffForm";
 import StaffList from "./StaffList";

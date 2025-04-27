@@ -1,8 +1,7 @@
 // src/components/ScheduleDisplay.tsx
-import React from "react";
 import type { Schedule, StaffMember } from "../types";
-import { DAYS_OF_WEEK, SHIFTS, ALL_ROLES } from "../config";
-import { timeToMinutes, minutesToTime } from "../utils"; // Assume these are in utils
+import { DAYS_OF_WEEK, SHIFTS } from "../config";
+import { timeToMinutes, minutesToTime } from "../utils";
 
 interface ScheduleDisplayProps {
   schedule: Schedule | null;
@@ -18,7 +17,6 @@ interface ProcessedSchedule {
   };
 }
 
-// processScheduleForTable function remains the same as before
 function processScheduleForTable(
   schedule: Schedule | null,
   staffList: StaffMember[]
@@ -90,11 +88,9 @@ function processScheduleForTable(
   return processed;
 }
 
-// --- ScheduleDisplay Component (Reversed Rows/Columns) ---
+// --- ScheduleDisplay Component ---
 function ScheduleDisplay({ schedule, staffList }: ScheduleDisplayProps) {
   const processedSchedule = processScheduleForTable(schedule, staffList);
-
-  // Sort staff list by name for consistent row ordering
   const sortedStaff = [...staffList].sort((a, b) =>
     a.name.localeCompare(b.name)
   );
@@ -104,78 +100,79 @@ function ScheduleDisplay({ schedule, staffList }: ScheduleDisplayProps) {
       schedule === null
         ? "No schedule generated yet..."
         : "Schedule generated, but no shifts assigned...";
-    return <p className="text-center text-gray-500 italic mt-4">{message}</p>;
+    return <p className="text-center text-gray-500 italic mt-6">{message}</p>; // Added margin-top
   }
 
   return (
-    // Container with horizontal scroll might still be needed if days have lots of text
-    <div className="schedule-table-container overflow-x-auto mt-4 pb-4">
-      <table className="min-w-full divide-y divide-gray-200 border border-gray-300">
+    <div className="schedule-table-container overflow-x-auto mt-4 pb-4 rounded-lg border border-gray-300 shadow">
+      {" "}
+      {/* Added rounded-lg, border, shadow */}
+      <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-100">
           <tr>
-            {/* Sticky header for Staff Name column */}
             <th
               scope="col"
-              className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-300 sticky left-0 bg-gray-100 z-10"
+              className="px-3 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider border-r border-gray-300 sticky left-0 bg-gray-100 z-10"
             >
+              {" "}
+              {/* Bold, slightly darker text */}
               Staff / Day
             </th>
-            {/* Render Days of Week as column headers */}
             {DAYS_OF_WEEK.map((day) => (
               <th
                 key={day}
                 scope="col"
-                className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap border-l border-gray-200"
+                className="px-3 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap border-l border-gray-200"
               >
+                {" "}
+                {/* Bold header */}
                 {day}
               </th>
             ))}
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {/* Iterate through sorted staff for rows */}
-          {sortedStaff.map((staff, staffIndex) => (
-            // Apply alternating row background color
-            <tr
-              key={staff.id}
-              className={staffIndex % 2 === 0 ? "bg-white" : "bg-gray-50"}
-            >
-              {/* Sticky cell for Staff Name */}
-              <td
-                className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-800 border-r border-gray-300 sticky left-0 z-10"
-                style={{
-                  backgroundColor: staffIndex % 2 === 0 ? "white" : "#F9FAFB",
-                }}
-              >
-                {staff.name}
-              </td>
-              {/* Render schedule data for each day */}
-              {DAYS_OF_WEEK.map((day) => {
-                // Get the processed assignments for this specific staff member on this day
-                const assignments = processedSchedule[day]?.[staff.id];
-                return (
-                  <td
-                    key={`${staff.id}-${day}`}
-                    className="px-4 py-2 whitespace-nowrap text-xs text-gray-700 border-l border-gray-200 align-top"
-                  >
-                    {assignments && assignments.length > 0 ? (
-                      // Display shifts, maybe stack vertically if multiple
-                      <div className="flex flex-col space-y-1">
-                        {assignments.map((a, index) => (
-                          <span
-                            key={index}
-                            className="block"
-                          >{`${a.shiftText}`}</span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">-</span> // Indicate empty slot
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+          {sortedStaff.map((staff, staffIndex) => {
+            const rowBgClass = staffIndex % 2 === 0 ? "bg-white" : "bg-gray-50";
+            return (
+              <tr key={staff.id} className={rowBgClass}>
+                <td
+                  className={`px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-300 sticky left-0 z-10 ${rowBgClass}`}
+                >
+                  {" "}
+                  {/* Use dynamic class */}
+                  {staff.name}
+                </td>
+                {/* Render schedule data for each day */}
+                {DAYS_OF_WEEK.map((day) => {
+                  const assignments = processedSchedule[day]?.[staff.id];
+                  return (
+                    <td
+                      key={`${staff.id}-${day}`}
+                      className="px-3 py-2 text-xs border-l border-gray-200 align-top min-w-[100px]"
+                    >
+                      {assignments && assignments.length > 0 ? (
+                        <div className="flex flex-col space-y-0.5">
+                          {assignments.map((a, index) => (
+                            // Display role alongside time
+                            <span
+                              key={index}
+                              className="block whitespace-nowrap"
+                            >
+                              {`${a.shiftText} `}
+                              <span className="text-gray-500">({a.role})</span>
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-300">-</span>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -10,8 +10,8 @@ interface StaffFormProps {
 function StaffForm({ onAddStaff }: StaffFormProps) {
   const [name, setName] = useState("");
   const [roles, setRoles] = useState<string[]>([]);
-  const [minHours, setMinHours] = useState<string>(""); // Store as string for input control
-  const [maxHours, setMaxHours] = useState<string>(""); // Store as string
+  const [minHours, setMinHours] = useState<string>("");
+  const [maxHours, setMaxHours] = useState<string>("");
 
   const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
@@ -28,22 +28,17 @@ function StaffForm({ onAddStaff }: StaffFormProps) {
       alert("Please enter a name and select at least one role.");
       return;
     }
-
     const newStaffData: Omit<StaffMember, "id"> = {
       name: name.trim(),
       roles: roles,
       minHoursPerWeek: minHours ? parseFloat(minHours) : null,
       maxHoursPerWeek: maxHours ? parseFloat(maxHours) : null,
     };
-
     onAddStaff(newStaffData);
-
-    // Reset form
     setName("");
     setRoles([]);
     setMinHours("");
     setMaxHours("");
-    // Manually uncheck checkboxes (might need refinement if roles are dynamic)
     const form = event.target as HTMLFormElement;
     form
       .querySelectorAll('input[type="checkbox"]')
@@ -51,13 +46,11 @@ function StaffForm({ onAddStaff }: StaffFormProps) {
   };
 
   return (
-    <div className="p-4 border border-gray-200 rounded shadow-sm bg-gray-50 mb-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-700">
-        Add New Staff
-      </h3>
-      <form onSubmit={handleSubmit}>
+    <div className="mb-6">
+      <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        {" "}
         {/* Name Input */}
-        <div className="mb-4">
+        <div>
           <label
             htmlFor="staff-name-input"
             className="block text-sm font-medium text-gray-700 mb-1"
@@ -70,28 +63,27 @@ function StaffForm({ onAddStaff }: StaffFormProps) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            // Uses @tailwindcss/forms default styles + focus customization
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
         </div>
-
         {/* Role Checkboxes */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Assignable Roles:
-          </label>
-          <div className="space-x-4 flex flex-wrap gap-y-2">
+          </label>{" "}
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
             {" "}
-            {/* Added flex-wrap */}
             {ALL_ROLES.map((role) => (
-              <span key={role} className="inline-flex items-center">
+              <div key={role} className="flex items-center">
                 <input
                   type="checkbox"
                   id={`role-${role}-form`}
                   name="staff-role-form"
                   value={role}
-                  checked={roles.includes(role)} // Control checked state
+                  checked={roles.includes(role)}
                   onChange={handleRoleChange}
-                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <label
                   htmlFor={`role-${role}-form`}
@@ -99,13 +91,12 @@ function StaffForm({ onAddStaff }: StaffFormProps) {
                 >
                   {role}
                 </label>
-              </span>
+              </div>
             ))}
           </div>
         </div>
-
         {/* Hour Limits */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="staff-min-hours-form"
@@ -120,7 +111,7 @@ function StaffForm({ onAddStaff }: StaffFormProps) {
               onChange={(e) => setMinHours(e.target.value)}
               min="0"
               step="0.5"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
           <div>
@@ -137,18 +128,20 @@ function StaffForm({ onAddStaff }: StaffFormProps) {
               onChange={(e) => setMaxHours(e.target.value)}
               min="0"
               step="0.5"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
         </div>
-
         {/* Submit Button */}
-        <button
-          type="submit"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Add Staff
-        </button>
+        <div>
+          {" "}
+          <button
+            type="submit"
+            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+          >
+            Add Staff
+          </button>
+        </div>
       </form>
     </div>
   );
