@@ -1,25 +1,30 @@
 // src/App.tsx
 import { useState, useCallback } from "react";
-import { Tab } from "@headlessui/react";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import StaffPanel from "./components/StaffPanel";
 import UnavailabilityPanel from "./components/UnavailabilityPanel";
 import NeedsPanel from "./components/NeedsPanel";
 import ScheduleDisplay from "./components/ScheduleDisplay";
+import ShiftDefinitionEditor from "./components/ShiftDefinitionEditor";
 import type {
   StaffMember,
   Unavailability,
   WeeklyNeeds,
   Schedule,
+  ShiftDefinitions,
 } from "./types";
 import { generateScheduleAPI } from "./api/scheduleApi";
-import { DAYS_OF_WEEK, SHIFT_KEYS, ALL_ROLES } from "./config";
+import { createInitialShiftDefinitions } from "./utils";
+import { DAYS_OF_WEEK, ALL_ROLES, SHIFT_TYPES } from "./config";
 import "./index.css";
 
+// Helper for conditional class names
 function classNames(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
 function App() {
+  // --- State ---
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [unavailabilityList, setUnavailabilityList] = useState<
     Unavailability[]
@@ -29,148 +34,138 @@ function App() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [staffIdCounter, setStaffIdCounter] = useState<number>(0);
-
+  const [shiftDefinitions, setShiftDefinitions] = useState<ShiftDefinitions>(
+    createInitialShiftDefinitions()
+  );
   const [shiftPreference, setShiftPreference] = useState<
     "PRIORITIZE_FULL_DAYS" | "PRIORITIZE_HALF_DAYS" | "NONE"
   >("PRIORITIZE_FULL_DAYS");
 
-  const handleAddStaff = (newStaffData: Omit<StaffMember, "id">) => {
-    const generatedId = `S${Date.now()}-${staffIdCounter}`;
-    setStaffIdCounter((prev) => prev + 1);
-    const staffToAdd: StaffMember = { ...newStaffData, id: generatedId };
-    setStaffList((prevList) => [...prevList, staffToAdd]);
-    console.log("Staff added:", staffToAdd);
-  };
+  // --- Callback Handlers ---
 
-  const handleDeleteStaff = (idToDelete: string) => {
-    if (
-      confirm(
-        "Are you sure you want to delete this staff member and their unavailability?"
-      )
-    ) {
-      const staffToDelete = staffList.find((s) => s.id === idToDelete);
-      setStaffList((prevList) =>
-        prevList.filter((staff) => staff.id !== idToDelete)
-      );
-      setUnavailabilityList((prevUnav) =>
-        prevUnav.filter((unav) => unav.employeeId !== idToDelete)
-      );
-      console.log(`Staff deleted: ${staffToDelete?.name} (ID: ${idToDelete})`);
-    }
-  };
+  const handleAddStaff = useCallback(
+    (newStaffData: Omit<StaffMember, "id">) => {
+      const generatedId = `S${Date.now()}-${staffIdCounter}`;
+      setStaffIdCounter((prev) => prev + 1);
+      const staffToAdd: StaffMember = { ...newStaffData, id: generatedId };
+      setStaffList((prevList) => [...prevList, staffToAdd]);
+      console.log("Staff added:", staffToAdd);
+    },
+    [staffIdCounter]
+  );
 
-  const handleAddUnavailability = (newUnavData: Unavailability) => {
-    setUnavailabilityList((prevList) => [...prevList, newUnavData]);
-    console.log("Unavailability added:", newUnavData);
-  };
-
-  const handleDeleteUnavailability = (
-    employeeId: string,
-    dayOfWeek: string
-  ) => {
-    if (
-      confirm(
-        `Are you sure you want to delete all unavailability for ${employeeId} on ${dayOfWeek}?`
-      )
-    ) {
-      setUnavailabilityList((prevList) =>
-        prevList.filter(
-          (item) =>
-            !(item.employeeId === employeeId && item.dayOfWeek === dayOfWeek)
+  const handleDeleteStaff = useCallback(
+    (idToDelete: string) => {
+      if (
+        confirm(
+          "Are you sure you want to delete this staff member and their unavailability?"
         )
-      );
-      console.log(`Unavailability deleted for ${employeeId} on ${dayOfWeek}`);
-    }
-  };
+      ) {
+        const staffToDelete = staffList.find((s) => s.id === idToDelete);
+        setStaffList((prevList) =>
+          prevList.filter((staff) => staff.id !== idToDelete)
+        );
+        setUnavailabilityList((prevUnav) =>
+          prevUnav.filter((unav) => unav.employeeId !== idToDelete)
+        );
+        console.log(
+          `Staff deleted: ${staffToDelete?.name} (ID: ${idToDelete})`
+        );
+      }
+    },
+    [staffList]
+  );
+
+  const handleReorderStaff = useCallback((reorderedList: StaffMember[]) => {
+    setStaffList(reorderedList);
+    console.log("Staff list reordered (priority changed).");
+  }, []);
+
+  const handleAddUnavailability = useCallback(
+    (newUnavData: Unavailability) => {
+      if (!staffList.some((staff) => staff.id === newUnavData.employeeId)) {
+        alert(`Error: Staff with ID ${newUnavData.employeeId} not found.`);
+        return;
+      }
+      setUnavailabilityList((prevList) => {
+        // Avoid adding exact duplicate entries for the same person/day/shifts
+        const existingIndex = prevList.findIndex(
+          (item) =>
+            item.employeeId === newUnavData.employeeId &&
+            item.dayOfWeek === newUnavData.dayOfWeek &&
+            JSON.stringify(item.shifts.sort()) ===
+              JSON.stringify(newUnavData.shifts.sort())
+        );
+        if (existingIndex > -1) {
+          console.log("Duplicate unavailability entry ignored.");
+          return prevList;
+        }
+        return [...prevList, newUnavData];
+      });
+      console.log("Unavailability added:", newUnavData);
+    },
+    [staffList]
+  );
+
+  const handleDeleteUnavailability = useCallback(
+    (employeeId: string, dayOfWeek: string) => {
+      if (
+        confirm(
+          `Are you sure you want to delete all unavailability for ${employeeId} on ${dayOfWeek}?`
+        )
+      ) {
+        setUnavailabilityList((prevList) =>
+          prevList.filter(
+            (item) =>
+              !(item.employeeId === employeeId && item.dayOfWeek === dayOfWeek)
+          )
+        );
+        console.log(`Unavailability deleted for ${employeeId} on ${dayOfWeek}`);
+      }
+    },
+    []
+  );
 
   const handleNeedsChange = useCallback(
-    (day: string, shiftKey: string, role: string, count: number) => {
+    (day: string, shiftType: string, role: string, count: number) => {
       setWeeklyNeeds((prevNeeds) => {
         const newNeeds = JSON.parse(JSON.stringify(prevNeeds));
 
-        if (!newNeeds[day]) {
-          newNeeds[day] = {};
-        }
-        if (!newNeeds[day][shiftKey]) {
-          newNeeds[day][shiftKey] = {};
-        }
+        // Ensure nested structure exists
+        if (!newNeeds[day]) newNeeds[day] = {};
+        if (!newNeeds[day][shiftType]) newNeeds[day][shiftType] = {};
 
         if (count > 0) {
-          newNeeds[day][shiftKey][role] = count;
+          newNeeds[day][shiftType][role] = count;
         } else {
-          delete newNeeds[day][shiftKey][role];
-          if (Object.keys(newNeeds[day][shiftKey]).length === 0) {
-            delete newNeeds[day][shiftKey];
-          }
-          if (Object.keys(newNeeds[day]).length === 0) {
-            delete newNeeds[day];
+          // Clean up: delete role, then shift, then day if they become empty
+          if (newNeeds[day]?.[shiftType]) {
+            delete newNeeds[day][shiftType][role];
+            if (Object.keys(newNeeds[day][shiftType]).length === 0) {
+              delete newNeeds[day][shiftType];
+            }
+            if (Object.keys(newNeeds[day]).length === 0) {
+              delete newNeeds[day];
+            }
           }
         }
-        console.log("Weekly Needs Updated:", newNeeds);
         return newNeeds;
       });
     },
     []
   );
 
-  const handleGenerateSchedule = async () => {
-    console.log("Generate button clicked. Preparing data...");
-    setIsLoading(true);
-    setSchedule(null);
-    setWarnings([]);
-
-    const staffPriority = staffList.map((staff) => staff.id);
-
-    const requestBody = {
-      staffList: staffList,
-      unavailabilityList: unavailabilityList,
-      weeklyNeeds: weeklyNeeds,
-      shiftPreference: shiftPreference,
-      staffPriority: staffPriority,
-    };
-
-    console.log("Sending request to backend:", requestBody);
-
-    try {
-      const responseData = await generateScheduleAPI(requestBody);
-      console.log("API Response received:", responseData);
-      if (responseData.success) {
-        setSchedule(responseData.schedule ?? {});
-        setWarnings(responseData.warnings || []);
-        console.log("Schedule generated successfully:", responseData.schedule);
-        if (responseData.warnings && responseData.warnings.length > 0) {
-          console.warn(
-            "Schedule generated with warnings:",
-            responseData.warnings
-          );
-        }
-      } else {
-        setSchedule(null);
-        const errorMessages = responseData.warnings || [
-          responseData.message || "Unknown backend error",
-        ];
-        setWarnings(errorMessages);
-        console.error("Schedule generation failed:", errorMessages);
-        alert("Schedule generation failed:\n" + errorMessages.join("\n"));
-      }
-    } catch (error) {
-      console.error("Error fetching schedule:", error);
+  const handleShiftDefinitionsChange = useCallback(
+    (newDefinitions: ShiftDefinitions) => {
+      setShiftDefinitions(newDefinitions);
+      console.log("Shift definitions updated in App:", newDefinitions);
       setSchedule(null);
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      setWarnings([`Error fetching schedule: ${errorMessage}`]);
-      alert(`Error fetching schedule: ${errorMessage}`);
-    } finally {
-      setIsLoading(false);
-      console.log("Generation process finished.");
-    }
-  };
+      setWarnings([]);
+    },
+    []
+  );
 
-  const handleReorderStaff = useCallback((reorderedList: StaffMember[]) => {
-    setStaffList(reorderedList);
-    console.log("Staff list reordered.");
-  }, []);
-
+  // --- Import Handlers ---
   const handleImportStaff = useCallback((importedData: any) => {
     if (!Array.isArray(importedData)) {
       alert("Import failed: Staff data must be an array.");
@@ -186,21 +181,22 @@ function App() {
         Array.isArray(item.roles)
     );
     if (!isValid) {
-      alert(
-        "Import failed: Staff data structure is invalid. Required fields: id, name, roles (array)."
-      );
+      alert("Import failed: Staff data structure is invalid.");
       return;
     }
-    const importedIds = new Set();
+    const importedIds = new Set<string>();
+    let hasDuplicates = false;
     for (const item of importedData) {
       if (importedIds.has(item.id)) {
         alert(
           `Import failed: Duplicate staff ID found in imported data: ${item.id}.`
         );
-        return;
+        hasDuplicates = true;
+        break;
       }
       importedIds.add(item.id);
     }
+    if (hasDuplicates) return;
 
     if (
       confirm(
@@ -219,11 +215,9 @@ function App() {
         alert("Import failed: Unavailability data must be an array.");
         return;
       }
-
       const currentStaffIds = new Set(staffList.map((s) => s.id));
       let invalidEntries = 0;
       const validatedData: Unavailability[] = [];
-
       for (const item of importedData) {
         if (
           item &&
@@ -241,23 +235,24 @@ function App() {
             validatedData.push(item as Unavailability);
           } else {
             invalidEntries++;
+            console.warn(
+              `Ignoring unavailability for unknown staff ID: ${item.employeeId}`
+            );
           }
         } else {
           invalidEntries++;
+          console.warn("Ignoring invalid unavailability record:", item);
         }
       }
-
       if (validatedData.length === 0 && importedData.length > 0) {
         alert(
           "Import failed: No valid unavailability records found or all records belong to unknown staff."
         );
         return;
       }
-
       let message = `Import ${validatedData.length} valid unavailability records? This will replace the current list.`;
       if (invalidEntries > 0)
         message += ` (${invalidEntries} invalid/unknown records ignored)`;
-
       if (confirm(message)) {
         setUnavailabilityList(validatedData);
         console.log("Unavailability data imported.");
@@ -275,7 +270,6 @@ function App() {
       alert("Import failed: Weekly needs data must be an object.");
       return;
     }
-
     let isValid = true;
     let errorMsg = "";
     for (const day in importedData) {
@@ -286,67 +280,136 @@ function App() {
       }
       if (typeof importedData[day] !== "object") {
         isValid = false;
-        errorMsg = `Data for ${day} is not an object`;
+        errorMsg = `Data for ${day} is not object`;
         break;
       }
-      for (const shiftKey in importedData[day]) {
-        if (!SHIFT_KEYS.includes(shiftKey)) {
+      for (const shiftType in importedData[day]) {
+        // Use shiftType here
+        // *** Use SHIFT_TYPES constant for validation ***
+        if (!SHIFT_TYPES.includes(shiftType as any)) {
+          // Use SHIFT_TYPES from config
           isValid = false;
-          errorMsg = `Invalid shift key for ${day}: ${shiftKey}`;
+          errorMsg = `Invalid shift type for ${day}: ${shiftType}`;
           break;
         }
-        if (typeof importedData[day][shiftKey] !== "object") {
+        if (typeof importedData[day][shiftType] !== "object") {
           isValid = false;
-          errorMsg = `Data for ${day}/${shiftKey} is not an object`;
+          errorMsg = `Data for ${day}/${shiftType} is not object`;
           break;
         }
-        for (const role in importedData[day][shiftKey]) {
+        for (const role in importedData[day][shiftType]) {
           if (!ALL_ROLES.includes(role)) {
             isValid = false;
-            errorMsg = `Invalid role for ${day}/${shiftKey}: ${role}`;
+            errorMsg = `Invalid role for ${day}/${shiftType}: ${role}`;
             break;
           }
-          const count = importedData[day][shiftKey][role];
+          const count = importedData[day][shiftType][role];
           if (
             typeof count !== "number" ||
             !Number.isInteger(count) ||
             count < 0
           ) {
             isValid = false;
-            errorMsg = `Invalid count for ${day}/${shiftKey}/${role}: ${count}`;
+            errorMsg = `Invalid count for ${day}/${shiftType}/${role}: ${count}`;
             break;
           }
         }
+        if (!isValid) break; // Break inner role loop
       }
-      if (!isValid) break;
+      if (!isValid) break; // Break outer shift loop
     }
-
     if (!isValid) {
       alert(`Import failed: Invalid weekly needs structure. ${errorMsg}`);
       return;
     }
-
     if (
-      confirm(
-        `Import weekly needs data? This will replace the current settings.`
-      )
+      confirm(`Import weekly needs data? This will replace current settings.`)
     ) {
       setWeeklyNeeds(importedData as WeeklyNeeds);
-      console.log(
-        "Weekly needs data imported. Grid will reflect on next interaction or re-render."
-      );
-      alert("Weekly needs imported. The input fields will update.");
+      console.log("Weekly needs imported.");
+      alert("Weekly needs imported. Input fields will update.");
     }
   }, []);
 
+  // --- Generate Schedule API Call  ---
+  const handleGenerateSchedule = async () => {
+    console.log("Generate button clicked. Preparing data...");
+    setIsLoading(true);
+    setSchedule(null);
+    setWarnings([]);
+    if (
+      shiftDefinitions.HALF_DAY_AM.end !== shiftDefinitions.HALF_DAY_PM.start
+    ) {
+      alert("Error: AM shift end time must equal PM shift start time.");
+      setIsLoading(false);
+      return;
+    }
+    if (
+      !shiftDefinitions.HALF_DAY_AM.start ||
+      !shiftDefinitions.HALF_DAY_AM.end ||
+      !shiftDefinitions.HALF_DAY_PM.start ||
+      !shiftDefinitions.HALF_DAY_PM.end
+    ) {
+      alert("Error: Shift start and end times cannot be empty.");
+      setIsLoading(false);
+      return;
+    }
+    const staffPriority = staffList.map((staff) => staff.id);
+    const requestBody = {
+      staffList,
+      unavailabilityList,
+      weeklyNeeds,
+      shiftDefinitions,
+      shiftPreference,
+      staffPriority,
+    };
+    console.log("Sending request to backend:", requestBody);
+    try {
+      const responseData = await generateScheduleAPI(requestBody);
+      console.log("API Response received:", responseData);
+      if (responseData.success) {
+        setSchedule(responseData.schedule ?? {});
+        setWarnings(responseData.warnings || []);
+        if (responseData.warnings && responseData.warnings.length > 0)
+          console.warn("Warnings:", responseData.warnings);
+      } else {
+        setSchedule(null);
+        const errorMessages = responseData.warnings || [
+          responseData.message || "Unknown error",
+        ];
+        setWarnings(errorMessages);
+        console.error("Failed:", errorMessages);
+      }
+    } catch (error: any) {
+      console.error("Fetch error:", error);
+      setSchedule(null);
+      const errorMessage = error?.message ?? "Unknown error.";
+      const errorWarnings = Array.isArray(error?.warnings)
+        ? error.warnings
+        : [];
+      setWarnings([`Error: ${errorMessage}`, ...errorWarnings]);
+    } finally {
+      setIsLoading(false);
+      console.log("Generation finished.");
+    }
+  };
+
+  // --- Render ---
   return (
     <div className="container mx-auto p-4 lg:p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
-        Restaurant Weekly Schedule Generator
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
+        Restaurant Schedule Generator
       </h1>
 
-      <Tab.Group>
-        <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1 mb-6">
+      {/* Shift Definition Editor */}
+      <ShiftDefinitionEditor
+        initialDefinitions={shiftDefinitions}
+        onShiftDefinitionsChange={handleShiftDefinitionsChange}
+      />
+
+      {/* Tabs for Staff, Unavailability, Needs */}
+      <TabGroup>
+        <TabList className="flex space-x-1 rounded-xl bg-indigo-900/20 p-1 my-6">
           {["Staff", "Unavailability", "Needs"].map((category) => (
             <Tab
               key={category}
@@ -363,13 +426,13 @@ function App() {
               {category}
             </Tab>
           ))}
-        </Tab.List>
-
-        <Tab.Panels className="mt-2">
-          <Tab.Panel
+        </TabList>
+        <TabPanels className="mt-2">
+          {/* Staff Panel */}
+          <TabPanel
             className={classNames(
-              "rounded-xl bg-white p-3",
-              "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
+              "rounded-xl bg-white p-4 shadow",
+              "focus:outline-none"
             )}
           >
             <StaffPanel
@@ -379,12 +442,12 @@ function App() {
               onReorderStaff={handleReorderStaff}
               onImportStaff={handleImportStaff}
             />
-          </Tab.Panel>
-
-          <Tab.Panel
+          </TabPanel>
+          {/* Unavailability Panel */}
+          <TabPanel
             className={classNames(
-              "rounded-xl bg-white p-3",
-              "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
+              "rounded-xl bg-white p-4 shadow",
+              "focus:outline-none"
             )}
           >
             <UnavailabilityPanel
@@ -394,12 +457,12 @@ function App() {
               onDeleteUnavailability={handleDeleteUnavailability}
               onImportUnavailability={handleImportUnavailability}
             />
-          </Tab.Panel>
-
-          <Tab.Panel
+          </TabPanel>
+          {/* Needs Panel */}
+          <TabPanel
             className={classNames(
-              "rounded-xl bg-white p-3",
-              "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
+              "rounded-xl bg-white p-4 shadow",
+              "focus:outline-none"
             )}
           >
             <NeedsPanel
@@ -407,17 +470,17 @@ function App() {
               onNeedsChange={handleNeedsChange}
               onImportNeeds={handleImportNeeds}
             />
-          </Tab.Panel>
-        </Tab.Panels>
-      </Tab.Group>
+          </TabPanel>
+        </TabPanels>
+      </TabGroup>
 
-      <div className="mt-8 space-y-6">
-        {/* --- Optimization Settings Section --- */}
-        <div className="p-4 bg-white rounded-lg shadow">
+      {/* Optimization, Controls, Output */}
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:gap-8 items-start">
+        {/* Optimization Settings */}
+        <div className="lg:col-span-1 p-4 bg-white rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            Optimization Settings
+            Optimization
           </h2>
-          {/* --- Shift Preference Select  --- */}
           <div className="mb-4">
             <label
               htmlFor="shift-pref-select"
@@ -429,7 +492,7 @@ function App() {
               id="shift-pref-select"
               value={shiftPreference}
               onChange={(e) => setShiftPreference(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white"
             >
               <option value="PRIORITIZE_FULL_DAYS">Prioritize Full Days</option>
               <option value="PRIORITIZE_HALF_DAYS">Prioritize Half Days</option>
@@ -437,46 +500,66 @@ function App() {
             </select>
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            Staff priority is now determined by the order in the Staff List
-            above (drag to reorder).
+            Staff priority set by Staff List order.
           </p>
         </div>
-        {/* Control and Output Section Placeholders */}
-        <div className="p-4 bg-white rounded-lg shadow text-center">
+
+        {/* Generate Button */}
+        <div className="lg:col-span-2 p-6 bg-white rounded-lg shadow flex flex-col items-center justify-center">
           <button
             onClick={handleGenerateSchedule}
             disabled={isLoading}
-            className={`px-6 py-3 text-lg font-semibold rounded-md text-white ${
+            className={`w-full max-w-xs px-8 py-4 text-xl font-semibold rounded-md text-white transition duration-150 ease-in-out ${
               isLoading
                 ? "bg-gray-400 cursor-not-allowed animate-pulse"
                 : "bg-green-600 hover:bg-green-700"
-            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out`}
+            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
           >
-            {isLoading ? "Is Loading..." : "Generated Schedule"}
+            {isLoading ? "Generating..." : "Generate Weekly Schedule"}
           </button>
           {isLoading && (
-            <p className="text-center text-blue-600 animate-pulse">
-              Waiting the result from Web Server...
+            <p className="mt-4 text-center text-sm text-blue-600 animate-pulse">
+              Fetching schedule from server...
             </p>
           )}
+        </div>
+      </div>
+
+      {/* Schedule Result and Logs */}
+      <div className="mt-8 space-y-6">
+        <div className="p-4 bg-white rounded-lg shadow min-h-[200px]">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            Schedule Result
+          </h2>
           {!isLoading && (
             <ScheduleDisplay schedule={schedule} staffList={staffList} />
           )}
         </div>
         <div className="p-4 bg-white rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            Logs and Warnings
+            Messages & Warnings
           </h2>
           {warnings.length > 0 && (
-            <div className="mb-4 p-3 bg-yellow-100 border border-yellow-300 rounded">
-              <h3 className="font-semibold text-yellow-800">logs/alert:</h3>
-              <ul className="list-disc list-inside text-yellow-700 text-sm space-y-1">
+            <div
+              className={`mb-4 p-3 rounded border text-sm ${
+                warnings.some((w) => w.toLowerCase().startsWith("error:"))
+                  ? "bg-red-100 border-red-300 text-red-800"
+                  : "bg-yellow-100 border-yellow-300 text-yellow-800"
+              }`}
+            >
+              <h3 className="font-semibold mb-1">Backend Messages:</h3>
+              <ul className="list-disc list-inside space-y-1">
                 {warnings.map((w, i) => (
-                  <li key={i}>{w}</li>
+                  <li key={i}>
+                    {w.replace(/^Warning: /i, "").replace(/^Error: /i, "")}
+                  </li>
                 ))}
               </ul>
             </div>
           )}
+          <p className="text-xs text-gray-400 italic">
+            Frontend logs are in the browser console (Press F12).
+          </p>
         </div>
       </div>
     </div>

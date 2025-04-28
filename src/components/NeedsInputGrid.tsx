@@ -1,58 +1,70 @@
 // src/components/NeedsInputGrid.tsx
 import React from "react";
 import type { WeeklyNeeds } from "../types";
-import { DAYS_OF_WEEK, SHIFT_KEYS, ALL_ROLES } from "../config";
+import {
+  DAYS_OF_WEEK,
+  SHIFT_TYPES,
+  SHIFT_TYPE_LABELS,
+  ALL_ROLES,
+} from "../config";
+import type { ShiftType } from "../config";
 
 interface NeedsInputGridProps {
   weeklyNeeds: WeeklyNeeds;
   onNeedsChange: (
     day: string,
-    shiftKey: string,
+    shiftType: ShiftType,
     role: string,
     count: number
   ) => void;
 }
 
 function NeedsInputGrid({ weeklyNeeds, onNeedsChange }: NeedsInputGridProps) {
+  // Input change handler remains the same
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     const parts = name.split("_");
     if (parts.length === 4) {
-      const [, day, shiftKey, role] = parts;
+      const [, day, shiftType, role] = parts;
       const count = parseInt(value) || 0;
-      onNeedsChange(day, shiftKey, role, count >= 0 ? count : 0);
+      onNeedsChange(day, shiftType as ShiftType, role, count >= 0 ? count : 0);
     }
   };
 
   return (
-    <div className="needs-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    // Outer grid for days, adjust columns based on screen size
+    <div className="needs-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {" "}
+      {/* Increased gap */}
       {DAYS_OF_WEEK.map((day) => (
+        // Card for each day
         <div
           key={day}
-          className="day-needs border border-gray-200 p-4 rounded-lg bg-white shadow-sm"
+          className="day-needs border border-gray-200 p-4 rounded-lg bg-white shadow hover:shadow-md transition-shadow duration-200"
         >
-          <h4 className="text-md font-semibold mb-3 border-b border-gray-200 pb-2 text-center text-gray-800">
+          <h4 className="text-lg font-bold mb-4 text-center text-indigo-700 border-b border-gray-200 pb-2">
             {day}
           </h4>
-          <div className="space-y-4">
-            {SHIFT_KEYS.map((shiftKey) => (
-              <div key={shiftKey} className="shift-needs">
-                <h5 className="text-sm font-medium mb-2 text-center text-gray-500">
-                  {shiftKey}
+          <div className="space-y-5">
+            {SHIFT_TYPES.map((shiftType) => (
+              <div key={shiftType} className="shift-needs">
+                <h5 className="text-sm font-semibold mb-2 text-gray-600">
+                  {SHIFT_TYPE_LABELS[shiftType]}
                 </h5>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {ALL_ROLES.map((role) => {
-                    const inputId = `needs_${day}_${shiftKey}_${role}`;
+                    const inputId = `needs_${day}_${shiftType}_${role}`;
+                    // Get current value, default to 0
                     const currentValue =
-                      weeklyNeeds[day]?.[shiftKey]?.[role] ?? 0;
+                      weeklyNeeds[day]?.[shiftType]?.[role] ?? 0;
                     return (
                       <div
                         key={role}
-                        className="flex items-center justify-center mb-1"
+                        className="flex items-center justify-between space-x-2"
                       >
                         <label
                           htmlFor={inputId}
-                          className="text-xs text-gray-600 w-14 text-right mr-2 shrink-0"
+                          className="text-sm font-medium text-gray-700 flex-shrink-0"
                         >
                           {role}:
                         </label>

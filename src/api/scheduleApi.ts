@@ -4,16 +4,21 @@ import type {
   Unavailability,
   WeeklyNeeds,
   ApiResponse,
-  Schedule,
-} from "../types"; // Ensure ApiResponse and Schedule are imported
+  ShiftDefinitions,
+} from "../types";
 import { API_BASE_URL } from "../config";
 
+// Interface for the data sent in the request body
 interface RequestData {
   staffList: StaffMember[];
   unavailabilityList: Unavailability[];
   weeklyNeeds: WeeklyNeeds;
+  shiftDefinitions: ShiftDefinitions;
+  shiftPreference: "PRIORITIZE_FULL_DAYS" | "PRIORITIZE_HALF_DAYS" | "NONE";
+  staffPriority: string[];
 }
 
+// Function to call the backend API
 export const generateScheduleAPI = async (
   requestData: RequestData
 ): Promise<ApiResponse> => {
@@ -23,23 +28,23 @@ export const generateScheduleAPI = async (
   try {
     const response = await fetch(apiUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestData),
     });
 
-    console.log("[API] Received response status:", response.status);
+    console.log(
+      "[API] Received response status:",
+      response.status,
+      response.statusText
+    );
 
     let responseData: any = {};
     let parseError = null;
 
     try {
-      // Check if response body exists before trying to parse
       const text = await response.text();
       if (text) {
         responseData = JSON.parse(text);
-        console.log("[API] Received response data:", responseData);
       } else {
         console.log("[API] Received empty response body.");
         if (response.ok) {
@@ -56,18 +61,21 @@ export const generateScheduleAPI = async (
       parseError = jsonError;
     }
 
+    // Check response status AFTER attempting to parse JSON
     if (!response.ok) {
-      // If HTTP status indicates an error
       const errorMessage =
         responseData?.message ||
         `HTTP error ${response.status}${
           parseError ? " (Failed to parse error details)" : ""
         }`;
       console.error(`[API] Error response received: ${errorMessage}`);
-      throw new Error(errorMessage);
+      const warnings = Array.isArray(responseData?.warnings)
+        ? responseData.warnings
+        : [];
+      throw { message: errorMessage, warnings: warnings };
     }
 
-    // If response is OK (2xx)
+    // If response is OK (2xx), construct a well-formed ApiResponse
     const apiResponse: ApiResponse = {
       success: responseData?.success ?? true,
       schedule: responseData?.schedule ?? null,
@@ -84,12 +92,12 @@ export const generateScheduleAPI = async (
           : undefined,
     };
     return apiResponse;
-  } catch (error) {
-    console.error("[API] Fetch error:", error);
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "An unknown network error occurred.";
-    throw new Error(errorMessage);
+  } catch (error: any) {
+    console.error("[API] Fetch/Processing error:", error);
+    throw {
+      message:
+        error?.message ?? "An unknown network or processing error occurred.",
+      warnings: error?.warnings ?? [],
+    };
   }
 };

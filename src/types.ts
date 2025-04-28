@@ -1,49 +1,60 @@
 // src/types.ts
+
+// Basic time definition
 export interface ShiftTime {
   start: string; // "HH:MM"
   end: string; // "HH:MM"
 }
 
+// Detailed definition for user-configurable shifts
+export interface ShiftDefinition extends ShiftTime {
+  hours: number;
+}
+export interface ShiftDefinitions {
+  HALF_DAY_AM: ShiftDefinition;
+  HALF_DAY_PM: ShiftDefinition;
+  FULL_DAY: ShiftDefinition;
+}
+
+// Staff member structure
 export interface StaffMember {
   id: string;
   name: string;
-  roles: string[]; // Array of role strings (e.g., "Server", "Cashier")
-  minHoursPerWeek?: number | null; // Optional number or null
-  maxHoursPerWeek?: number | null; // Optional number or null
+  roles: string[];
+  minHoursPerWeek?: number | null;
+  maxHoursPerWeek?: number | null;
 }
 
+// Unavailability structure
 export interface Unavailability {
   employeeId: string;
-  dayOfWeek: string; // e.g., "Monday"
-  shifts: ShiftTime[]; // Array of unavailable shift times
+  dayOfWeek: string;
+  shifts: ShiftTime[];
 }
 
+// Weekly needs structure
 export interface WeeklyNeeds {
-  // Key is DayOfWeek (string)
   [day: string]: {
-    // Key is ShiftKey (string, e.g., "11:00-16:00")
-    [shift: string]: {
-      // Key is Role (string)
-      [role: string]: number; // Value is the needed count
+    [shiftType: string]: {
+      [role: string]: number;
     };
   };
 }
 
+// Schedule result structure
 export interface Schedule {
-  // Key is DayOfWeek (string)
   [day: string]: {
-    // Key is ShiftKey (string)
-    [shift: string]: {
-      // Key is Role (string)
-      [role: string]: string[]; // Value is an array of assigned employee IDs
+    [shiftType: string]: {
+      [role: string]: string[];
     };
   };
 }
 
+// Structure for the API response from the backend
 export interface ApiResponse {
   success: boolean;
-  schedule?: Schedule | null; // Schedule might be null or empty object on success/failure
+  schedule?: Schedule | null;
   warnings?: string[];
   calculationTimeMs?: number;
-  message?: string; // For error messages
+  message?: string;
 }
