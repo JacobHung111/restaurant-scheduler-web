@@ -5,6 +5,7 @@ import ImportExportButtons from "./ImportExportButtons";
 
 interface NeedsPanelProps {
   weeklyNeeds: WeeklyNeeds;
+  definedRoles: string[];
   onNeedsChange: (
     day: string,
     shiftKey: string,
@@ -16,6 +17,7 @@ interface NeedsPanelProps {
 
 function NeedsPanel({
   weeklyNeeds,
+  definedRoles,
   onNeedsChange,
   onImportNeeds,
 }: NeedsPanelProps) {
@@ -27,7 +29,11 @@ function NeedsPanel({
         dataToExport={weeklyNeeds}
         onDataImport={onImportNeeds}
       />
-      <NeedsInputGrid weeklyNeeds={weeklyNeeds} onNeedsChange={onNeedsChange} />
+      <NeedsInputGrid
+        definedRoles={definedRoles}
+        weeklyNeeds={weeklyNeeds}
+        onNeedsChange={onNeedsChange}
+      />
     </div>
   );
 }
