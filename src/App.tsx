@@ -131,14 +131,12 @@ function App() {
       setWeeklyNeeds((prevNeeds) => {
         const newNeeds = JSON.parse(JSON.stringify(prevNeeds));
 
-        // Ensure nested structure exists
         if (!newNeeds[day]) newNeeds[day] = {};
         if (!newNeeds[day][shiftType]) newNeeds[day][shiftType] = {};
 
         if (count > 0) {
           newNeeds[day][shiftType][role] = count;
         } else {
-          // Clean up: delete role, then shift, then day if they become empty
           if (newNeeds[day]?.[shiftType]) {
             delete newNeeds[day][shiftType][role];
             if (Object.keys(newNeeds[day][shiftType]).length === 0) {
@@ -284,10 +282,7 @@ function App() {
         break;
       }
       for (const shiftType in importedData[day]) {
-        // Use shiftType here
-        // *** Use SHIFT_TYPES constant for validation ***
         if (!SHIFT_TYPES.includes(shiftType as any)) {
-          // Use SHIFT_TYPES from config
           isValid = false;
           errorMsg = `Invalid shift type for ${day}: ${shiftType}`;
           break;
@@ -314,9 +309,9 @@ function App() {
             break;
           }
         }
-        if (!isValid) break; // Break inner role loop
+        if (!isValid) break;
       }
-      if (!isValid) break; // Break outer shift loop
+      if (!isValid) break;
     }
     if (!isValid) {
       alert(`Import failed: Invalid weekly needs structure. ${errorMsg}`);

@@ -11,14 +11,13 @@ export const DAYS_OF_WEEK = [
 ];
 
 // Define the logical shift types
-export const SHIFT_TYPES = ["HALF_DAY_AM", "HALF_DAY_PM", "FULL_DAY"] as const;
+export const SHIFT_TYPES = ["HALF_DAY_AM", "HALF_DAY_PM"] as const;
 export type ShiftType = (typeof SHIFT_TYPES)[number];
 
 // Labels for displaying shift types in the UI
 export const SHIFT_TYPE_LABELS: Record<ShiftType, string> = {
   HALF_DAY_AM: "AM Shift",
   HALF_DAY_PM: "PM Shift",
-  FULL_DAY: "Full Day",
 };
 
 // All possible roles

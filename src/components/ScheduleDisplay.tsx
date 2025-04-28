@@ -24,8 +24,7 @@ function ScheduleDisplay({ schedule, staffList }: ScheduleDisplayProps) {
   // Define the order for shift types in the cell
   const shiftTypeOrder: Record<ShiftType, number> = {
     HALF_DAY_AM: 1,
-    FULL_DAY: 2,
-    HALF_DAY_PM: 3,
+    HALF_DAY_PM: 2,
   };
 
   return (
