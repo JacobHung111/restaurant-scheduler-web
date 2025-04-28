@@ -6,6 +6,7 @@ import ImportExportButtons from "./ImportExportButtons";
 
 interface StaffPanelProps {
   staffList: StaffMember[];
+  definedRoles: string[];
   onAddStaff: (data: Omit<StaffMember, "id">) => void;
   onDeleteStaff: (id: string) => void;
   onReorderStaff: (list: StaffMember[]) => void;
@@ -14,6 +15,7 @@ interface StaffPanelProps {
 
 function StaffPanel({
   staffList,
+  definedRoles,
   onAddStaff,
   onDeleteStaff,
   onReorderStaff,
@@ -29,7 +31,7 @@ function StaffPanel({
         dataToExport={staffList}
         onDataImport={onImportStaff}
       />
-      <StaffForm onAddStaff={onAddStaff} />
+      <StaffForm definedRoles={definedRoles} onAddStaff={onAddStaff} />
       <StaffList
         staffList={staffList}
         onDeleteStaff={onDeleteStaff}

@@ -6,6 +6,7 @@ import UnavailabilityPanel from "./components/UnavailabilityPanel";
 import NeedsPanel from "./components/NeedsPanel";
 import ScheduleDisplay from "./components/ScheduleDisplay";
 import ShiftDefinitionEditor from "./components/ShiftDefinitionEditor";
+import RoleManager from "./components/RoleManager";
 import type {
   StaffMember,
   Unavailability,
@@ -15,7 +16,11 @@ import type {
 } from "./types";
 import { generateScheduleAPI } from "./api/scheduleApi";
 import { createInitialShiftDefinitions } from "./utils";
-import { DAYS_OF_WEEK, ALL_ROLES, SHIFT_TYPES } from "./config";
+import {
+  DAYS_OF_WEEK,
+  ALL_ROLES as DEFAULT_ROLES,
+  SHIFT_TYPES,
+} from "./config";
 import "./index.css";
 
 // Helper for conditional class names
@@ -26,6 +31,7 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 function App() {
   // --- State ---
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
+  const [definedRoles, setDefinedRoles] = useState<string[]>(DEFAULT_ROLES);
   const [unavailabilityList, setUnavailabilityList] = useState<
     Unavailability[]
   >([]);
@@ -45,13 +51,32 @@ function App() {
 
   const handleAddStaff = useCallback(
     (newStaffData: Omit<StaffMember, "id">) => {
+      if (
+        !newStaffData.assignedRolesInPriority ||
+        newStaffData.assignedRolesInPriority.length === 0
+      ) {
+        alert("Please select and prioritize at least one role for the staff.");
+        return;
+      }
+      const invalidRoles = newStaffData.assignedRolesInPriority.filter(
+        (r) => !definedRoles.includes(r)
+      );
+      if (invalidRoles.length > 0) {
+        alert(
+          `Error: The following selected roles are not valid: ${invalidRoles.join(
+            ", "
+          )}`
+        );
+        return;
+      }
+
       const generatedId = `S${Date.now()}-${staffIdCounter}`;
       setStaffIdCounter((prev) => prev + 1);
       const staffToAdd: StaffMember = { ...newStaffData, id: generatedId };
       setStaffList((prevList) => [...prevList, staffToAdd]);
       console.log("Staff added:", staffToAdd);
     },
-    [staffIdCounter]
+    [staffIdCounter, definedRoles]
   );
 
   const handleDeleteStaff = useCallback(
@@ -80,6 +105,104 @@ function App() {
     setStaffList(reorderedList);
     console.log("Staff list reordered (priority changed).");
   }, []);
+
+  const handleAddRole = useCallback(
+    (newRole: string) => {
+      const trimmedRole = newRole.trim();
+      if (trimmedRole && !definedRoles.includes(trimmedRole)) {
+        setDefinedRoles((prev) => [...prev, trimmedRole].sort());
+        console.log("Role added:", trimmedRole);
+      } else if (definedRoles.includes(trimmedRole)) {
+        alert(`Role "${trimmedRole}" already exists.`);
+      } else {
+        alert("Role name cannot be empty.");
+      }
+    },
+    [definedRoles]
+  );
+
+  const handleDeleteRole = useCallback(
+    (roleToDelete: string) => {
+      if (!definedRoles.includes(roleToDelete)) return;
+      if (
+        staffList.some((staff) =>
+          staff.assignedRolesInPriority.includes(roleToDelete)
+        )
+      ) {
+        if (
+          !confirm(
+            `Role "${roleToDelete}" is assigned to some staff. Deleting it will remove it from their assignments. Staff with no roles left will be removed. Continue?`
+          )
+        ) {
+          return;
+        }
+      } else if (
+        !confirm(`Are you sure you want to delete the role "${roleToDelete}"?`)
+      ) {
+        return;
+      }
+
+      // 1. Remove role from defined roles
+      setDefinedRoles((prev) => prev.filter((role) => role !== roleToDelete));
+
+      // 2. Update staff list
+      const updatedStaffList: StaffMember[] = [];
+      const staffToDeleteIds: string[] = [];
+      staffList.forEach((staff) => {
+        // Filter out the deleted role from assignedRolesInPriority
+        const newAssignedRoles = staff.assignedRolesInPriority.filter(
+          (role) => role !== roleToDelete
+        );
+        if (newAssignedRoles.length > 0) {
+          updatedStaffList.push({
+            ...staff,
+            assignedRolesInPriority: newAssignedRoles,
+          });
+        } else {
+          staffToDeleteIds.push(staff.id);
+          console.log(
+            `Staff ${staff.name} marked for deletion (no roles left).`
+          );
+        }
+      });
+      setStaffList(updatedStaffList);
+
+      // 3. Update unavailability list (remove entries for deleted staff)
+      if (staffToDeleteIds.length > 0) {
+        setUnavailabilityList((prevUnav) =>
+          prevUnav.filter((unav) => !staffToDeleteIds.includes(unav.employeeId))
+        );
+        console.log(
+          `Removed unavailability for deleted staff: ${staffToDeleteIds.join(
+            ", "
+          )}`
+        );
+      }
+
+      // 4. Update weekly needs (remove needs for the deleted role)
+      setWeeklyNeeds((prevNeeds) => {
+        const newNeeds = JSON.parse(JSON.stringify(prevNeeds));
+        let needsChanged = false;
+        for (const day in newNeeds) {
+          for (const shiftType in newNeeds[day]) {
+            if (newNeeds[day][shiftType]?.[roleToDelete]) {
+              delete newNeeds[day][shiftType][roleToDelete];
+              needsChanged = true;
+              if (Object.keys(newNeeds[day][shiftType]).length === 0)
+                delete newNeeds[day][shiftType];
+              if (Object.keys(newNeeds[day]).length === 0) delete newNeeds[day];
+            }
+          }
+        }
+        if (needsChanged)
+          console.log(`Removed needs for deleted role: ${roleToDelete}`);
+        return newNeeds;
+      });
+
+      console.log(`Role "${roleToDelete}" deleted.`);
+    },
+    [definedRoles, staffList]
+  );
 
   const handleAddUnavailability = useCallback(
     (newUnavData: Unavailability) => {
@@ -128,12 +251,19 @@ function App() {
 
   const handleNeedsChange = useCallback(
     (day: string, shiftType: string, role: string, count: number) => {
+      if (!definedRoles.includes(role)) {
+        console.error(
+          `Attempted to change needs for an undefined role: ${role}`
+        );
+        alert(
+          `Cannot set needs for role "${role}" as it's not currently defined.`
+        );
+        return;
+      }
       setWeeklyNeeds((prevNeeds) => {
         const newNeeds = JSON.parse(JSON.stringify(prevNeeds));
-
         if (!newNeeds[day]) newNeeds[day] = {};
         if (!newNeeds[day][shiftType]) newNeeds[day][shiftType] = {};
-
         if (count > 0) {
           newNeeds[day][shiftType][role] = count;
         } else {
@@ -150,7 +280,7 @@ function App() {
         return newNeeds;
       });
     },
-    []
+    [definedRoles]
   );
 
   const handleShiftDefinitionsChange = useCallback(
@@ -164,48 +294,74 @@ function App() {
   );
 
   // --- Import Handlers ---
-  const handleImportStaff = useCallback((importedData: any) => {
-    if (!Array.isArray(importedData)) {
-      alert("Import failed: Staff data must be an array.");
-      return;
-    }
-    const isValid = importedData.every(
-      (item) =>
-        item &&
-        typeof item === "object" &&
-        "id" in item &&
-        "name" in item &&
-        "roles" in item &&
-        Array.isArray(item.roles)
-    );
-    if (!isValid) {
-      alert("Import failed: Staff data structure is invalid.");
-      return;
-    }
-    const importedIds = new Set<string>();
-    let hasDuplicates = false;
-    for (const item of importedData) {
-      if (importedIds.has(item.id)) {
-        alert(
-          `Import failed: Duplicate staff ID found in imported data: ${item.id}.`
-        );
-        hasDuplicates = true;
-        break;
+  const handleImportStaff = useCallback(
+    (importedData: any) => {
+      if (!Array.isArray(importedData)) {
+        alert("Import failed: Staff data must be an array.");
+        return;
       }
-      importedIds.add(item.id);
-    }
-    if (hasDuplicates) return;
+      const currentDefinedRolesSet = new Set(definedRoles);
+      const isValid = importedData.every(
+        (item) =>
+          item &&
+          typeof item === "object" &&
+          "id" in item &&
+          "name" in item &&
+          // Check assignedRolesInPriority exists and its elements are valid roles
+          "assignedRolesInPriority" in item &&
+          Array.isArray(item.assignedRolesInPriority) &&
+          item.assignedRolesInPriority.length > 0 &&
+          item.assignedRolesInPriority.every(
+            (r: any) => typeof r === "string" && currentDefinedRolesSet.has(r)
+          ) &&
+          (item.minHoursPerWeek === null ||
+            item.minHoursPerWeek === undefined ||
+            typeof item.minHoursPerWeek === "number") &&
+          (item.maxHoursPerWeek === null ||
+            item.maxHoursPerWeek === undefined ||
+            typeof item.maxHoursPerWeek === "number")
+      );
+      if (!isValid) {
+        alert(
+          "Import failed: Invalid staff structure or contains undefined/invalid roles in 'assignedRolesInPriority'."
+        );
+        return;
+      }
+      const importedIds = new Set<string>();
+      let hasDuplicates = false;
+      for (const item of importedData) {
+        if (importedIds.has(item.id)) {
+          alert(
+            `Import failed: Duplicate staff ID found in imported data: ${item.id}.`
+          );
+          hasDuplicates = true;
+          break;
+        }
+        importedIds.add(item.id);
+      }
+      if (hasDuplicates) return;
 
-    if (
-      confirm(
-        `Import ${importedData.length} staff records? This will replace the current list and clear unavailability.`
-      )
-    ) {
-      setStaffList(importedData as StaffMember[]);
-      setUnavailabilityList([]);
-      console.log("Staff data imported.");
-    }
-  }, []);
+      if (
+        confirm(
+          `Import ${importedData.length} staff records? This will replace the current list and clear unavailability.`
+        )
+      ) {
+        const formattedStaffList = importedData.map(
+          (item: any): StaffMember => ({
+            id: item.id,
+            name: item.name,
+            assignedRolesInPriority: item.assignedRolesInPriority,
+            minHoursPerWeek: item.minHoursPerWeek ?? null,
+            maxHoursPerWeek: item.maxHoursPerWeek ?? null,
+          })
+        );
+        setStaffList(formattedStaffList);
+        setUnavailabilityList([]);
+        console.log("Staff data imported.");
+      }
+    },
+    [definedRoles]
+  ); // Depends on definedRoles for validation
 
   const handleImportUnavailability = useCallback(
     (importedData: any) => {
@@ -270,6 +426,7 @@ function App() {
     }
     let isValid = true;
     let errorMsg = "";
+    const currentDefinedRolesSet = new Set(definedRoles);
     for (const day in importedData) {
       if (!DAYS_OF_WEEK.includes(day)) {
         isValid = false;
@@ -293,9 +450,9 @@ function App() {
           break;
         }
         for (const role in importedData[day][shiftType]) {
-          if (!ALL_ROLES.includes(role)) {
+          if (!currentDefinedRolesSet.has(role)) {
             isValid = false;
-            errorMsg = `Invalid role for ${day}/${shiftType}: ${role}`;
+            errorMsg = `Invalid role found in needs: ${role}`;
             break;
           }
           const count = importedData[day][shiftType][role];
@@ -358,7 +515,7 @@ function App() {
       shiftPreference,
       staffPriority,
     };
-    console.log("Sending request to backend:", requestBody);
+    console.log("Sending request to backend:", JSON.stringify(requestBody));
     try {
       const responseData = await generateScheduleAPI(requestBody);
       console.log("API Response received:", responseData);
@@ -402,6 +559,13 @@ function App() {
         onShiftDefinitionsChange={handleShiftDefinitionsChange}
       />
 
+      {/* --- Role Manager --- */}
+      <RoleManager
+        definedRoles={definedRoles}
+        onAddRole={handleAddRole}
+        onDeleteRole={handleDeleteRole}
+      />
+
       {/* Tabs for Staff, Unavailability, Needs */}
       <TabGroup>
         <TabList className="flex space-x-1 rounded-xl bg-indigo-900/20 p-1 my-6">
@@ -431,6 +595,7 @@ function App() {
             )}
           >
             <StaffPanel
+              definedRoles={definedRoles}
               staffList={staffList}
               onAddStaff={handleAddStaff}
               onDeleteStaff={handleDeleteStaff}
@@ -461,6 +626,7 @@ function App() {
             )}
           >
             <NeedsPanel
+              definedRoles={definedRoles}
               weeklyNeeds={weeklyNeeds}
               onNeedsChange={handleNeedsChange}
               onImportNeeds={handleImportNeeds}
@@ -527,7 +693,11 @@ function App() {
             Schedule Result
           </h2>
           {!isLoading && (
-            <ScheduleDisplay schedule={schedule} staffList={staffList} />
+            <ScheduleDisplay
+              schedule={schedule}
+              staffList={staffList}
+              shiftDefinitions={shiftDefinitions}
+            />
           )}
         </div>
         <div className="p-4 bg-white rounded-lg shadow">
