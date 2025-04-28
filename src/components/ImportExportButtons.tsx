@@ -103,7 +103,8 @@ function ImportExportButtons<T>({
   };
 
   return (
-    <div className="io-buttons border-b border-gray-200 pb-3 mb-4 flex gap-3 flex-wrap items-center">
+    <div className="io-buttons border-b border-gray-200 pb-4 mb-4 flex gap-3 flex-wrap items-center">
+      {" "}
       <input
         type="file"
         ref={fileInputRef}
@@ -114,14 +115,14 @@ function ImportExportButtons<T>({
       <button
         type="button"
         onClick={handleImportClick}
-        className="px-3 py-1.5 text-xs font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 transition ease-in-out duration-150"
+        className="px-4 py-2 text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 transition ease-in-out duration-150"
       >
         Import {dataType} (.json)
       </button>
       <button
         type="button"
         onClick={handleExport}
-        className="px-3 py-1.5 text-xs font-medium rounded-md shadow-sm text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-500 transition ease-in-out duration-150"
+        className="px-4 py-2 text-sm font-medium rounded-md shadow-sm text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-500 transition ease-in-out duration-150"
       >
         Export {dataType} (.json)
       </button>
