@@ -1,19 +1,14 @@
 // src/components/ScheduleDisplay.tsx
-import type { Schedule, StaffMember, ShiftDefinitions } from "../types";
-import { DAYS_OF_WEEK, ShiftType } from "../config";
+import type { Schedule, StaffMember } from "../types";
+import { DAYS_OF_WEEK, SHIFT_TYPE_LABELS, ShiftType } from "../config";
 
 interface ScheduleDisplayProps {
   schedule: Schedule | null;
   staffList: StaffMember[];
-  shiftDefinitions: ShiftDefinitions;
 }
 
 // --- ScheduleDisplay Component ---
-function ScheduleDisplay({
-  schedule,
-  staffList,
-  shiftDefinitions,
-}: ScheduleDisplayProps) {
+function ScheduleDisplay({ schedule, staffList }: ScheduleDisplayProps) {
   const sortedStaff = [...staffList].sort((a, b) =>
     a.name.localeCompare(b.name)
   );
@@ -104,8 +99,9 @@ function ScheduleDisplay({
                               key={index}
                               className="block whitespace-nowrap"
                             >
-                              {shiftDefinitions[a.shiftType]?.start}-
-                              {shiftDefinitions[a.shiftType]?.end}{" "}
+                              {`${
+                                SHIFT_TYPE_LABELS[a.shiftType] || a.shiftType
+                              } `}
                               <span className="text-gray-500">({a.role})</span>
                             </span>
                           ))}

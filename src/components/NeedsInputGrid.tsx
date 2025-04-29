@@ -1,12 +1,16 @@
 // src/components/NeedsInputGrid.tsx
 import React from "react";
 import type { WeeklyNeeds } from "../types";
-import { DAYS_OF_WEEK, SHIFT_TYPES, SHIFT_TYPE_LABELS } from "../config";
+import {
+  DAYS_OF_WEEK,
+  SHIFT_TYPES,
+  SHIFT_TYPE_LABELS,
+  ALL_ROLES,
+} from "../config";
 import type { ShiftType } from "../config";
 
 interface NeedsInputGridProps {
   weeklyNeeds: WeeklyNeeds;
-  definedRoles: string[];
   onNeedsChange: (
     day: string,
     shiftType: ShiftType,
@@ -15,24 +19,14 @@ interface NeedsInputGridProps {
   ) => void;
 }
 
-function NeedsInputGrid({
-  weeklyNeeds,
-  definedRoles,
-  onNeedsChange,
-}: NeedsInputGridProps) {
+function NeedsInputGrid({ weeklyNeeds, onNeedsChange }: NeedsInputGridProps) {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     const day = event.target.dataset.day;
     const shiftType = event.target.dataset.shiftType as ShiftType | undefined;
     const role = event.target.dataset.role;
 
-    if (
-      day &&
-      shiftType &&
-      role &&
-      SHIFT_TYPES.includes(shiftType) &&
-      definedRoles.includes(role)
-    ) {
+    if (day && shiftType && role && SHIFT_TYPES.includes(shiftType)) {
       let count: number;
       if (value === "") {
         count = 0;
@@ -66,7 +60,7 @@ function NeedsInputGrid({
                   {SHIFT_TYPE_LABELS[shiftType]}
                 </h5>
                 <div className="space-y-1.5">
-                  {definedRoles.map((role) => {
+                  {ALL_ROLES.map((role) => {
                     const inputId = `needs_${day}_${shiftType}_${role}`;
                     const currentValue =
                       weeklyNeeds[day]?.[shiftType]?.[role] ?? 0;

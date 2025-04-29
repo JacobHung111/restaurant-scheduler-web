@@ -20,7 +20,7 @@ export interface ShiftDefinitions {
 export interface StaffMember {
   id: string;
   name: string;
-  assignedRolesInPriority: string[];
+  roles: string[];
   minHoursPerWeek?: number | null;
   maxHoursPerWeek?: number | null;
 }
