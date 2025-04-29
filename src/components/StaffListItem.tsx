@@ -74,8 +74,7 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
           </span>
         </div>
         <div className="text-xs text-gray-500 mt-0.5">
-          <span className="font-medium">Roles:</span>{" "}
-          {staff.assignedRolesInPriority.join(", ")}
+          <span className="font-medium">Roles:</span> {staff.roles.join(", ")}
           {staff.minHoursPerWeek != null ? (
             <span className="ml-2">
               <span className="font-medium">Min:</span> {staff.minHoursPerWeek}h

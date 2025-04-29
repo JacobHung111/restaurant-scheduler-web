@@ -57,9 +57,9 @@ function UnavailabilityForm({
       shifts: finalShifts,
     };
     onAddUnavailability(newUnavData);
-    // setSelectedStaffId("");
-    // setSelectedDay("");
-    // setSelectedShifts([]);
+    setSelectedStaffId("");
+    setSelectedDay("");
+    setSelectedShifts([]);
     const form = event.target as HTMLFormElement;
     form
       .querySelectorAll('input[type="checkbox"]')
