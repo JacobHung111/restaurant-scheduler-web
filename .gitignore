@@ -26,7 +26,6 @@ pnpm-debug.log*
 Thumbs.db
 
 # Environment variables
-.env
 .env.*
 !.env.example
 
