@@ -722,9 +722,6 @@ function App() {
               </ul>
             </div>
           )}
-          <p className="text-xs text-gray-400 italic">
-            Frontend logs are in the browser console (Press F12).
-          </p>
         </div>
       </div>
     </div>
