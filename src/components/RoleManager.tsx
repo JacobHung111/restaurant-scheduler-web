@@ -1,22 +1,14 @@
 // src/components/RoleManager.tsx
 import React, { useState } from "react";
+import { useStaffStore } from "../stores/useStaffStore";
 
-interface RoleManagerProps {
-  definedRoles: string[];
-  onAddRole: (newRole: string) => void;
-  onDeleteRole: (roleToDelete: string) => void;
-}
-
-function RoleManager({
-  definedRoles,
-  onAddRole,
-  onDeleteRole,
-}: RoleManagerProps) {
+function RoleManager() {
+  const { definedRoles, addRole, deleteRole } = useStaffStore();
   const [newRoleName, setNewRoleName] = useState("");
 
   const handleAddSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onAddRole(newRoleName);
+    addRole(newRoleName);
     setNewRoleName("");
   };
 
@@ -38,7 +30,7 @@ function RoleManager({
               >
                 {role}
                 <button
-                  onClick={() => onDeleteRole(role)}
+                  onClick={() => deleteRole(role)}
                   className="ml-1.5 flex-shrink-0 p-0.5 rounded-full inline-flex items-center justify-center text-gray-500 hover:bg-red-200 hover:text-red-700 focus:outline-none focus:bg-red-500 focus:text-white"
                   aria-label={`Delete role ${role}`}
                 >

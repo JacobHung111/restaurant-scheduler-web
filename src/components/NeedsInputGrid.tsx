@@ -3,6 +3,7 @@ import React from "react";
 import type { WeeklyNeeds } from "../types";
 import { DAYS_OF_WEEK, SHIFT_TYPES, SHIFT_TYPE_LABELS } from "../config";
 import type { ShiftType } from "../config";
+import { logger } from "../utils/logger";
 
 interface NeedsInputGridProps {
   weeklyNeeds: WeeklyNeeds;
@@ -42,7 +43,7 @@ function NeedsInputGrid({
       }
       onNeedsChange(day, shiftType, role, count);
     } else {
-      console.error(
+      logger.error(
         "Missing or invalid data attributes on input:",
         event.target.dataset
       );

@@ -6,20 +6,24 @@ import ImportExportButtons from "./ImportExportButtons";
 interface NeedsPanelProps {
   weeklyNeeds: WeeklyNeeds;
   definedRoles: string[];
-  onNeedsChange: (
+  onUpdateNeeds: (
     day: string,
     shiftKey: string,
     role: string,
     count: number
   ) => void;
-  onImportNeeds: (data: any) => void;
+  onExportSuccess?: (fileName: string, dataType: string) => void;
+  onExportError?: (error: string) => void;
+  onNoDataToExport?: (dataType: string) => void;
 }
 
 function NeedsPanel({
   weeklyNeeds,
   definedRoles,
-  onNeedsChange,
-  onImportNeeds,
+  onUpdateNeeds,
+  onExportSuccess,
+  onExportError,
+  onNoDataToExport,
 }: NeedsPanelProps) {
   return (
     <div className="p-4 bg-white rounded-lg shadow">
@@ -27,12 +31,15 @@ function NeedsPanel({
       <ImportExportButtons
         dataType="Weekly Needs"
         dataToExport={weeklyNeeds}
-        onDataImport={onImportNeeds}
+        onExportSuccess={onExportSuccess}
+        onExportError={onExportError}
+        onNoDataToExport={() => onNoDataToExport?.('Weekly Needs')}
+        importDisabled={true}
       />
       <NeedsInputGrid
         definedRoles={definedRoles}
         weeklyNeeds={weeklyNeeds}
-        onNeedsChange={onNeedsChange}
+        onNeedsChange={onUpdateNeeds}
       />
     </div>
   );

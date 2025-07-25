@@ -1,5 +1,6 @@
 // src/utils.ts
 import type { ShiftDefinitions } from "./types";
+import { logger } from "./utils/logger";
 
 // Helper to convert HH:MM to minutes since midnight
 export function timeToMinutes(timeStr: string): number {
@@ -16,12 +17,12 @@ export function timeToMinutes(timeStr: string): number {
       minutes < 0 ||
       minutes > 59
     ) {
-      console.warn(`timeToMinutes received out-of-range time: ${timeStr}`);
+      logger.warn(`timeToMinutes received out-of-range time: ${timeStr}`);
       return -1; // Indicate error
     }
     return hours * 60 + minutes;
   } catch {
-    console.warn(`timeToMinutes failed to parse time: ${timeStr}`);
+    logger.warn(`timeToMinutes failed to parse time: ${timeStr}`);
     return -1; // Indicate error
   }
 }

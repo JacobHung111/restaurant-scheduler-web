@@ -9,7 +9,9 @@ interface UnavailabilityPanelProps {
   unavailabilityList: Unavailability[];
   onAddUnavailability: (data: Unavailability) => void;
   onDeleteUnavailability: (employeeId: string, dayOfWeek: string) => void;
-  onImportUnavailability: (data: any) => void;
+  onExportSuccess?: (fileName: string, dataType: string) => void;
+  onExportError?: (error: string) => void;
+  onNoDataToExport?: (dataType: string) => void;
 }
 
 function UnavailabilityPanel({
@@ -17,7 +19,9 @@ function UnavailabilityPanel({
   unavailabilityList,
   onAddUnavailability,
   onDeleteUnavailability,
-  onImportUnavailability,
+  onExportSuccess,
+  onExportError,
+  onNoDataToExport,
 }: UnavailabilityPanelProps) {
   return (
     <div className="p-4 bg-white rounded-lg shadow">
@@ -27,7 +31,10 @@ function UnavailabilityPanel({
       <ImportExportButtons
         dataType="Unavailability"
         dataToExport={unavailabilityList}
-        onDataImport={onImportUnavailability}
+        onExportSuccess={onExportSuccess}
+        onExportError={onExportError}
+        onNoDataToExport={() => onNoDataToExport?.('Unavailability')}
+        importDisabled={true}
       />
       <UnavailabilityForm
         staffList={staffList}

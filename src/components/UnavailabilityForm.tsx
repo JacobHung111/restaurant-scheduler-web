@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import type { StaffMember, Unavailability, ShiftTime } from "../types";
 import { DAYS_OF_WEEK } from "../config";
+import { useScheduleStore } from "../stores/useScheduleStore";
 
 interface UnavailabilityFormProps {
   staffList: StaffMember[];
@@ -26,6 +27,7 @@ function UnavailabilityForm({
   const [selectedStaffId, setSelectedStaffId] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [selectedShifts, setSelectedShifts] = useState<ShiftTime[]>([]);
+  const { showMessage } = useScheduleStore();
 
   const handleShiftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
@@ -42,7 +44,11 @@ function UnavailabilityForm({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedStaffId || !selectedDay || selectedShifts.length === 0) {
-      alert("Please select staff, day, and at least one unavailable shift.");
+      showMessage(
+        'warning',
+        'Incomplete Unavailability Information',
+        'Please select staff, day, and at least one unavailable shift.'
+      );
       return;
     }
     const isAllDaySelected = selectedShifts.some(

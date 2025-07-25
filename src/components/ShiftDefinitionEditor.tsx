@@ -4,8 +4,8 @@ import type { ShiftDefinitions } from "../types";
 import { timeToMinutes } from "../utils";
 
 interface ShiftDefinitionEditorProps {
-  initialDefinitions: ShiftDefinitions;
-  onShiftDefinitionsChange: (newDefinitions: ShiftDefinitions) => void;
+  shiftDefinitions: ShiftDefinitions;
+  onUpdateShiftDefinitions: (newDefinitions: ShiftDefinitions) => void;
 }
 
 // Helper to calculate hours between two HH:MM times
@@ -21,14 +21,14 @@ const isValidTimeFormat = (time: string): boolean => {
 };
 
 function ShiftDefinitionEditor({
-  initialDefinitions,
-  onShiftDefinitionsChange,
+  shiftDefinitions,
+  onUpdateShiftDefinitions,
 }: ShiftDefinitionEditorProps) {
   // Local state to manage input values
-  const [amStart, setAmStart] = useState(initialDefinitions.HALF_DAY_AM.start);
-  const [amEnd, setAmEnd] = useState(initialDefinitions.HALF_DAY_AM.end);
-  const [pmStart, setPmStart] = useState(initialDefinitions.HALF_DAY_PM.start);
-  const [pmEnd, setPmEnd] = useState(initialDefinitions.HALF_DAY_PM.end);
+  const [amStart, setAmStart] = useState(shiftDefinitions.HALF_DAY_AM.start);
+  const [amEnd, setAmEnd] = useState(shiftDefinitions.HALF_DAY_AM.end);
+  const [pmStart, setPmStart] = useState(shiftDefinitions.HALF_DAY_PM.start);
+  const [pmEnd, setPmEnd] = useState(shiftDefinitions.HALF_DAY_PM.end);
 
   // Derived state for validation messages
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -65,8 +65,8 @@ function ShiftDefinitionEditor({
       FULL_DAY: { start: amStart, end: pmEnd, hours: amHours + pmHours },
     };
 
-    onShiftDefinitionsChange(newDefinitions);
-  }, [amStart, amEnd, pmStart, pmEnd, onShiftDefinitionsChange]);
+    onUpdateShiftDefinitions(newDefinitions);
+  }, [amStart, amEnd, pmStart, pmEnd, onUpdateShiftDefinitions]);
 
   // Use useEffect to call updateDefinitions whenever local times change
   useEffect(() => {

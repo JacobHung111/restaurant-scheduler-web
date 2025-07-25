@@ -10,7 +10,9 @@ interface StaffPanelProps {
   onAddStaff: (data: Omit<StaffMember, "id">) => void;
   onDeleteStaff: (id: string) => void;
   onReorderStaff: (list: StaffMember[]) => void;
-  onImportStaff: (data: any) => void;
+  onExportSuccess?: (fileName: string, dataType: string) => void;
+  onExportError?: (error: string) => void;
+  onNoDataToExport?: (dataType: string) => void;
 }
 
 function StaffPanel({
@@ -19,7 +21,9 @@ function StaffPanel({
   onAddStaff,
   onDeleteStaff,
   onReorderStaff,
-  onImportStaff,
+  onExportSuccess,
+  onExportError,
+  onNoDataToExport,
 }: StaffPanelProps) {
   return (
     <div className="p-4 bg-white rounded-lg shadow">
@@ -29,7 +33,10 @@ function StaffPanel({
       <ImportExportButtons
         dataType="Staff"
         dataToExport={staffList}
-        onDataImport={onImportStaff}
+        onExportSuccess={onExportSuccess}
+        onExportError={onExportError}
+        onNoDataToExport={() => onNoDataToExport?.('Staff')}
+        importDisabled={true}
       />
       <StaffForm definedRoles={definedRoles} onAddStaff={onAddStaff} />
       <StaffList

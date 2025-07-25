@@ -4,6 +4,7 @@ import { DAYS_OF_WEEK, ShiftType } from "../config";
 
 interface ScheduleDisplayProps {
   schedule: Schedule | null;
+  warnings: string[];
   staffList: StaffMember[];
   shiftDefinitions: ShiftDefinitions;
 }
@@ -11,6 +12,7 @@ interface ScheduleDisplayProps {
 // --- ScheduleDisplay Component ---
 function ScheduleDisplay({
   schedule,
+  warnings,
   staffList,
   shiftDefinitions,
 }: ScheduleDisplayProps) {
@@ -33,7 +35,20 @@ function ScheduleDisplay({
   };
 
   return (
-    <div className="schedule-table-container overflow-x-auto mt-4 pb-4 rounded-lg border border-gray-300 shadow">
+    <div className="mt-4">
+      {/* Warnings Display */}
+      {warnings && warnings.length > 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+          <h3 className="text-sm font-medium text-yellow-800 mb-2">Warnings:</h3>
+          <ul className="text-sm text-yellow-700 list-disc list-inside space-y-1">
+            {warnings.map((warning, index) => (
+              <li key={index}>{warning}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      <div className="schedule-table-container overflow-x-auto pb-4 rounded-lg border border-gray-300 shadow">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-100">
           <tr>
@@ -120,7 +135,8 @@ function ScheduleDisplay({
             );
           })}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }

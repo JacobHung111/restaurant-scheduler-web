@@ -142,8 +142,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
   // Use priorityRoles for validation and submission
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!name.trim() || priorityRoles.length === 0) {
-      alert("Please enter name and assign/prioritize at least one role.");
+    if (!name.trim()) {
       return;
     }
     const newStaffData = {
@@ -152,9 +151,10 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
       minHoursPerWeek: minHours ? parseFloat(minHours) : null,
       maxHoursPerWeek: maxHours ? parseFloat(maxHours) : null,
     };
+    
     onAddStaff(newStaffData);
     setName("");
-    // setPriorityRoles([]);
+    setPriorityRoles([]);
     setMinHours("");
     setMaxHours("");
   };

@@ -1,16 +1,25 @@
 // src/components/ImportExportButtons.tsx
 import React, { useRef } from "react";
+import { logger } from "../utils/logger";
 
 interface ImportExportButtonsProps<T> {
   dataType: string;
   dataToExport: T;
-  onDataImport: (importedData: T) => void;
+  onDataImport?: (importedData: T) => void;
+  onExportSuccess?: (fileName: string, dataType: string) => void;
+  onExportError?: (error: string) => void;
+  onNoDataToExport?: () => void;
+  importDisabled?: boolean;
 }
 
 function ImportExportButtons<T>({
   dataType,
   dataToExport,
   onDataImport,
+  onExportSuccess,
+  onExportError,
+  onNoDataToExport,
+  importDisabled = false,
 }: ImportExportButtonsProps<T>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -22,7 +31,7 @@ function ImportExportButtons<T>({
         Object.keys(dataToExport).length > 0;
 
     if (!hasData) {
-      alert(`No ${dataType} data available to export.`);
+      onNoDataToExport?.();
       return;
     }
 
@@ -40,10 +49,11 @@ function ImportExportButtons<T>({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      console.log(`${dataType} data exported as ${fileName}`);
+      logger.log(`${dataType} data exported as ${fileName}`);
+      onExportSuccess?.(fileName, dataType);
     } catch (error) {
-      console.error(`Failed to export ${dataType} data:`, error);
-      alert(`Failed to export ${dataType} data. See console for details.`);
+      logger.error(`Failed to export ${dataType} data:`, error);
+      onExportError?.(error instanceof Error ? error.message : 'Unknown export error');
     }
   };
 
@@ -56,7 +66,7 @@ function ImportExportButtons<T>({
     if (!file) return;
 
     if (file.type !== "application/json") {
-      alert("Please select a valid JSON file (.json).");
+      // File type validation is now handled by parent component
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -74,28 +84,23 @@ function ImportExportButtons<T>({
         if (importedData === null || typeof importedData === "undefined") {
           throw new Error("Imported JSON data is null or undefined.");
         }
-        console.log(
+        logger.log(
           `Successfully parsed imported ${dataType} data:`,
           importedData
         );
 
-        onDataImport(importedData);
-        alert(`${dataType} data imported successfully!`);
+        onDataImport?.(importedData);
       } catch (error) {
-        console.error(`Failed to import ${dataType} data:`, error);
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Unknown error during import.";
-        alert(`Failed to import ${dataType} data: ${message}`);
+        logger.error(`Failed to import ${dataType} data:`, error);
+        // Error handling is now done by parent component through MessageModal
       } finally {
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     };
 
     reader.onerror = (e) => {
-      console.error("Error reading file:", e);
-      alert("Error reading the selected file.");
+      logger.error("Error reading file:", e);
+      // File reading error is now handled by parent component
       if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -112,13 +117,15 @@ function ImportExportButtons<T>({
         onChange={handleFileChange}
         style={{ display: "none" }}
       />
-      <button
-        type="button"
-        onClick={handleImportClick}
-        className="px-4 py-2 text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 transition ease-in-out duration-150"
-      >
-        Import {dataType} (.json)
-      </button>
+      {!importDisabled && (
+        <button
+          type="button"
+          onClick={handleImportClick}
+          className="px-4 py-2 text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 transition ease-in-out duration-150"
+        >
+          Import {dataType} (.json)
+        </button>
+      )}
       <button
         type="button"
         onClick={handleExport}

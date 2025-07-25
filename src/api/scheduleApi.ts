@@ -5,8 +5,10 @@ import type {
   WeeklyNeeds,
   ApiResponse,
   ShiftDefinitions,
+  Schedule,
 } from "../types";
 import { API_BASE_URL } from "../config";
+import { logger } from "../utils/logger";
 
 // Interface for the data sent in the request body
 interface RequestData {
@@ -23,7 +25,7 @@ export const generateScheduleAPI = async (
   requestData: RequestData
 ): Promise<ApiResponse> => {
   const apiUrl = `${API_BASE_URL}/api/schedule`;
-  console.log(`[API] Sending POST request to ${apiUrl}`);
+  logger.log(`[API] Sending POST request to ${apiUrl}`);
 
   try {
     const response = await fetch(apiUrl, {
@@ -32,13 +34,13 @@ export const generateScheduleAPI = async (
       body: JSON.stringify(requestData),
     });
 
-    console.log(
+    logger.log(
       "[API] Received response status:",
       response.status,
       response.statusText
     );
 
-    let responseData: any = {};
+    let responseData: unknown = {};
     let parseError = null;
 
     try {
@@ -46,7 +48,7 @@ export const generateScheduleAPI = async (
       if (text) {
         responseData = JSON.parse(text);
       } else {
-        console.log("[API] Received empty response body.");
+        logger.log("[API] Received empty response body.");
         if (response.ok) {
           return {
             success: true,
@@ -57,47 +59,55 @@ export const generateScheduleAPI = async (
         }
       }
     } catch (jsonError) {
-      console.error("[API] Failed to parse JSON response:", jsonError);
+      logger.error("[API] Failed to parse JSON response:", jsonError);
       parseError = jsonError;
     }
 
     // Check response status AFTER attempting to parse JSON
     if (!response.ok) {
+      const parsedData = responseData as { message?: string; warnings?: string[] };
       const errorMessage =
-        responseData?.message ||
+        parsedData?.message ||
         `HTTP error ${response.status}${
           parseError ? " (Failed to parse error details)" : ""
         }`;
-      console.error(`[API] Error response received: ${errorMessage}`);
-      const warnings = Array.isArray(responseData?.warnings)
-        ? responseData.warnings
+      logger.error(`[API] Error response received: ${errorMessage}`);
+      const warnings = Array.isArray(parsedData?.warnings)
+        ? parsedData.warnings
         : [];
       throw { message: errorMessage, warnings: warnings };
     }
 
     // If response is OK (2xx), construct a well-formed ApiResponse
+    const parsedData = responseData as { 
+      success?: boolean; 
+      schedule?: unknown; 
+      warnings?: string[];
+      calculationTimeMs?: number;
+      message?: string;
+    };
     const apiResponse: ApiResponse = {
-      success: responseData?.success ?? true,
-      schedule: responseData?.schedule ?? null,
-      warnings: Array.isArray(responseData?.warnings)
-        ? responseData.warnings
+      success: parsedData?.success ?? true,
+      schedule: (parsedData?.schedule as Schedule) ?? null,
+      warnings: Array.isArray(parsedData?.warnings)
+        ? parsedData.warnings
         : [],
       calculationTimeMs:
-        typeof responseData?.calculationTimeMs === "number"
-          ? responseData.calculationTimeMs
+        typeof parsedData?.calculationTimeMs === "number"
+          ? parsedData.calculationTimeMs
           : undefined,
       message:
-        typeof responseData?.message === "string"
-          ? responseData.message
+        typeof parsedData?.message === "string"
+          ? parsedData.message
           : undefined,
     };
     return apiResponse;
-  } catch (error: any) {
-    console.error("[API] Fetch/Processing error:", error);
+  } catch (error: unknown) {
+    logger.error("[API] Fetch/Processing error:", error);
     throw {
       message:
-        error?.message ?? "An unknown network or processing error occurred.",
-      warnings: error?.warnings ?? [],
+        (error as { message?: string })?.message ?? "An unknown network or processing error occurred.",
+      warnings: (error as { warnings?: string[] })?.warnings ?? [],
     };
   }
 };
