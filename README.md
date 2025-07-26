@@ -7,6 +7,7 @@ A production-ready React 19 restaurant staff scheduling application that intelli
 - **Smart Staff Management** - Role assignments with drag-and-drop priority ordering
 - **Intelligent Scheduling** - AI-powered schedule generation with conflict resolution
 - **Universal Data Import** - Auto-detects and handles multiple JSON formats
+- **Complete Dark Mode** - Full light/dark/system theme support with persistent storage
 - **Real-time Validation** - Immediate feedback with comprehensive error handling
 - **Accessibility First** - Full keyboard navigation and screen reader support
 - **Production Ready** - Enterprise-level code quality with comprehensive testing
@@ -28,9 +29,10 @@ TanStack Query 5.83.0 - Server state management and intelligent caching
 ### UI & Accessibility  
 ```
 HeadlessUI 2.2.2 - Accessible, unstyled UI primitives
-Tailwind CSS 3.4.17 - Utility-first styling with responsive design
+Tailwind CSS 3.4.17 - Utility-first styling with dark mode support
 @dnd-kit 6.3.1 - Accessible drag-and-drop functionality
 Heroicons 2.2.0 - Professional icon system
+Complete Dark Mode - Light/Dark/System theme with persistent storage
 ```
 
 ### Development & Quality
@@ -72,11 +74,12 @@ npm run preview  # Preview production build locally
 ## 📋 User Guide
 
 ### Basic Workflow
-1. **Define Roles** - Create job positions (Server, Cashier, etc.)
-2. **Add Staff** - Assign roles and set priority via drag-and-drop
-3. **Set Availability** - Define when staff are unavailable
-4. **Configure Needs** - Specify required staff per day/shift/role
-5. **Generate Schedule** - AI creates optimized weekly assignments
+1. **Choose Theme** - Select Light, Dark, or System theme (top-right toggle)
+2. **Define Roles** - Create job positions (Server, Cashier, etc.)
+3. **Add Staff** - Assign roles and set priority via drag-and-drop
+4. **Set Availability** - Define when staff are unavailable
+5. **Configure Needs** - Specify required staff per day/shift/role
+6. **Generate Schedule** - AI creates optimized weekly assignments
 
 ### Data Management
 - **Universal Import** - Automatically detects JSON format types
@@ -124,12 +127,14 @@ src/
 ├── stores/              # Zustand state management (NOT useState)
 │   ├── useStaffStore.ts        # Staff and roles with validation
 │   ├── useUnavailabilityStore.ts # Availability with conflict detection  
-│   └── useScheduleStore.ts     # Schedule generation and MessageModal
+│   ├── useScheduleStore.ts     # Schedule generation and MessageModal
+│   └── useSettingsStore.ts     # Theme management with localStorage
 ├── components/          # React components with TypeScript
-│   ├── MessageModal.tsx        # Unified user feedback system
-│   ├── ErrorBoundary.tsx       # Runtime error recovery
-│   ├── StaffForm.tsx           # Staff creation with validation
-│   └── [other components]      # Feature-specific UI components
+│   ├── MessageModal.tsx        # Unified user feedback system (dark mode)
+│   ├── ThemeToggle.tsx         # Light/Dark/System theme switcher
+│   ├── ErrorBoundary.tsx       # Runtime error recovery (dark mode)
+│   ├── StaffForm.tsx           # Staff creation with validation (dark mode)
+│   └── [other components]      # Feature-specific UI components (all dark mode)
 ├── hooks/               # Custom hooks for store selectors
 ├── utils/               # Utilities and validation
 │   ├── logger.ts              # Environment-aware logging system
@@ -180,6 +185,7 @@ VITE_API_BASE_URL=http://localhost:5001
 
 ### User Experience
 - ✅ **Responsive Design** - Mobile-first with touch support
+- ✅ **Complete Dark Mode** - Light/Dark/System theme with persistent storage
 - ✅ **Real-time Feedback** - Immediate validation and error messages
 - ✅ **Progressive Enhancement** - Core functionality without JavaScript
 - ✅ **Loading States** - Clear feedback during async operations
@@ -211,6 +217,7 @@ VITE_API_BASE_URL=http://localhost:5001
 3. **Type Safety** - Strict TypeScript, use type guards for external data
 4. **Performance** - Use useShallow for store selectors
 5. **Accessibility** - HeadlessUI components with proper ARIA support
+6. **Dark Mode** - All components must include `dark:` variants using slate palette
 
 ### Code Style
 - Interface over type for object shapes
@@ -233,5 +240,36 @@ This project follows enterprise React patterns with:
 - Comprehensive error boundaries
 - Production-ready state management
 - Accessible UI component architecture
+- Complete dark mode support with slate color palette
+
+## 🌙 Dark Mode Features
+
+### Theme System
+- **Light Mode** - Clean, professional interface with gray color palette
+- **Dark Mode** - Modern dark interface using slate-900/800/700 backgrounds
+- **System Mode** - Automatically follows OS dark mode preference
+- **Persistent Storage** - Theme choice saved to localStorage
+- **Smooth Transitions** - Seamless switching between themes
+
+### Implementation Details
+```typescript
+// Theme management with useSettingsStore
+const { theme, isDarkMode, toggleTheme } = useSettingsStore();
+
+// Component dark mode pattern
+className="bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100"
+
+// Form elements
+className="border-gray-300 dark:border-slate-600 dark:bg-slate-700"
+
+// Interactive elements  
+className="hover:bg-gray-100 dark:hover:bg-slate-700"
+```
+
+### Color Palette
+- **Backgrounds**: `slate-900` (page), `slate-800` (cards), `slate-700` (inputs)
+- **Text**: `slate-100` (primary), `slate-300` (secondary), `slate-400` (muted)
+- **Borders**: `slate-700` (standard), `slate-600` (form elements)
+- **Accents**: `blue-600/500/400` for interactive elements in dark mode
 
 Built with modern React development best practices and enterprise-level quality standards.

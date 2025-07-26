@@ -42,6 +42,25 @@ const handleAddStaff = (data) => {
 };
 ```
 
+### Theme & Settings Management
+**Complete dark mode support with persistent storage**:
+
+```typescript
+// Settings store for theme management
+const { theme, isDarkMode, setTheme, toggleTheme } = useSettingsStore(
+  useShallow((state) => ({
+    theme: state.theme,
+    isDarkMode: state.isDarkMode,
+    setTheme: state.setTheme,
+    toggleTheme: state.toggleTheme,
+  }))
+);
+
+// Theme modes: 'light' | 'dark' | 'system'
+// Auto-persists to localStorage
+// System theme detection with media query
+```
+
 ### Data Flow
 ```
 User Input → Store Action → OperationResult → Component Handler → MessageModal Feedback
@@ -68,6 +87,13 @@ User Input → Store Action → OperationResult → Component Handler → Messag
 - `messageModal: MessageModal` - Unified user feedback system
 - `showMessage(type, title, message, details?)` - Display feedback
 
+### useSettingsStore
+- `theme: 'light' | 'dark' | 'system'` - Current theme mode
+- `isDarkMode: boolean` - Computed dark mode state
+- `setTheme(theme) → void` - Set specific theme mode
+- `toggleTheme() → void` - Cycle through Light → Dark → System
+- Auto-saves to localStorage with key 'restaurant-scheduler-settings'
+
 ## Key Components
 
 ### StaffForm & StaffList
@@ -89,6 +115,13 @@ User Input → Store Action → OperationResult → Component Handler → Messag
 - **NEVER use alert(), confirm(), or console.log()** 
 - All user feedback goes through MessageModal system
 - Types: 'success', 'warning', 'error' with optional details
+- Full dark mode support with theme-aware colors
+
+### ThemeToggle
+- Cycle through Light → Dark → System modes
+- Visual icons for each theme state
+- Integrated with useSettingsStore
+- Persistent theme selection with system detection
 
 ## Data Import/Export
 
@@ -172,32 +205,35 @@ const handleAction = (input) => {
 - **ARIA labels** and semantic markup required for accessibility
 - **Focus management** with proper keyboard navigation
 
-#### Color Palette
+#### Color Palette (Light + Dark Mode)
 ```css
-/* Primary Colors */
-bg-gray-50      /* Page backgrounds, light containers */
-bg-white        /* Card backgrounds, modal panels */
-bg-gray-900     /* Dark overlays, high contrast text */
+/* Primary Colors - Light Mode */
+bg-gray-50 dark:bg-slate-900     /* Page backgrounds */
+bg-white dark:bg-slate-800       /* Card backgrounds, modal panels */
+bg-gray-100 dark:bg-slate-800    /* Light containers */
 
-/* Text Colors */
-text-gray-900   /* Primary headings, important text */
-text-gray-700   /* Secondary text, labels */
-text-gray-600   /* Tertiary text, descriptions */
-text-gray-500   /* Muted text, placeholders */
+/* Text Colors - Light + Dark */
+text-gray-900 dark:text-slate-100    /* Primary headings, important text */
+text-gray-700 dark:text-slate-300    /* Secondary text, labels */
+text-gray-600 dark:text-slate-400    /* Tertiary text, descriptions */
+text-gray-500 dark:text-slate-400    /* Muted text, placeholders */
 
-/* Interactive Colors */
-bg-indigo-600   /* Primary buttons, CTAs */
-bg-blue-600     /* Secondary actions, links */
-bg-gray-600     /* Neutral buttons */
-bg-red-600      /* Destructive actions */
-bg-green-600    /* Success states */
-bg-yellow-600   /* Warning states */
+/* Interactive Colors - Dark Mode Variants */
+bg-indigo-600 dark:bg-blue-600       /* Primary buttons, CTAs */
+bg-blue-600 dark:bg-blue-600         /* Secondary actions, links */
+bg-gray-600 dark:bg-slate-600        /* Neutral buttons */
+bg-red-600 dark:bg-red-600           /* Destructive actions */
+bg-green-600 dark:bg-green-600       /* Success states */
+bg-yellow-600 dark:bg-yellow-600     /* Warning states */
 
-/* State Colors */
-bg-gray-100     /* Light backgrounds, disabled states */
-bg-red-100      /* Error backgrounds */
-bg-green-100    /* Success backgrounds */
-bg-yellow-100   /* Warning backgrounds */
+/* Border Colors - Dark Mode Support */
+border-gray-200 dark:border-slate-700    /* Standard borders */
+border-gray-300 dark:border-slate-600    /* Form element borders */
+
+/* State Colors - Dark Mode Backgrounds */
+bg-red-100 dark:bg-red-900/30        /* Error backgrounds */
+bg-green-100 dark:bg-green-900/30    /* Success backgrounds */
+bg-yellow-100 dark:bg-yellow-900/30  /* Warning backgrounds */
 ```
 
 #### Typography Scale
@@ -255,23 +291,23 @@ hover:shadow-md    /* Hover state elevation */
 focus:ring-2 focus:ring-offset-2  /* Focus indicators */
 ```
 
-#### Component Patterns
+#### Component Patterns (Dark Mode Compatible)
 ```css
 /* Cards/Panels */
-"bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+"bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6"
 
 /* Buttons - Primary */
-"bg-indigo-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+"bg-indigo-600 dark:bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-400"
 
 /* Buttons - Secondary */
-"bg-gray-50 text-gray-700 border border-gray-300 py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-100"
+"bg-gray-50 dark:bg-slate-700 text-gray-700 dark:text-slate-300 border border-gray-300 dark:border-slate-600 py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-slate-600"
 
 /* Form Inputs */
-"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+"mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-indigo-500 dark:focus:border-blue-400 focus:ring-indigo-500 dark:focus:ring-blue-400 sm:text-sm"
 
 /* Overlays/Modals */
-"fixed inset-0 z-50 bg-gray-900 bg-opacity-75 backdrop-blur-sm"
-"bg-white rounded-lg shadow-xl border border-gray-200"
+"fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
+"bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700"
 ```
 
 #### Interactive States
@@ -317,7 +353,13 @@ const { mutate: generateSchedule, isPending } = useMutation({
 ```
 src/
 ├── stores/           # Zustand stores (NOT useState)
+│   ├── useStaffStore.ts
+│   ├── useUnavailabilityStore.ts
+│   ├── useScheduleStore.ts
+│   └── useSettingsStore.ts    # Theme management
 ├── components/       # React components with TypeScript
+│   ├── ThemeToggle.tsx        # Theme switching component
+│   └── MessageModal.tsx       # Dark mode compatible
 ├── hooks/           # Custom hooks for store selectors
 ├── utils/           # logger, validation, helpers
 ├── api/             # TanStack Query integration
@@ -335,5 +377,16 @@ src/
 6. **Validate external data** - Type guards for all imports
 7. **HeadlessUI + Tailwind** - No custom CSS components
 8. **Environment-aware logging** - Development vs production
+9. **Full dark mode support** - All components must include `dark:` variants
+10. **Use slate colors** - Consistent slate-900/800/700 palette for dark mode
 
-This application follows enterprise React patterns with strict TypeScript, unified error handling, and performance-optimized state management.
+## Theme System Requirements
+
+- **Complete Coverage**: All UI elements support light and dark modes
+- **Persistent Storage**: Theme preference saved to localStorage
+- **System Detection**: Auto-follow system dark mode preference
+- **Slate Palette**: Use slate-900, slate-800, slate-700 for dark backgrounds
+- **Blue Accents**: Use blue-600/500/400 for dark mode interactive elements
+- **Consistent Patterns**: Follow established dark mode component patterns
+
+This application follows enterprise React patterns with strict TypeScript, unified error handling, performance-optimized state management, and comprehensive dark mode support.
