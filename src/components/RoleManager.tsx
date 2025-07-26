@@ -13,25 +13,25 @@ function RoleManager() {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow mb-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">Manage Roles</h2>
-      <div className="mb-3">
-        <h3 className="text-sm font-medium text-gray-600 mb-2">
+    <div className="p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 mb-6">
+      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-slate-100">Manage Roles</h2>
+      <div className="mb-4">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
           Current Roles:
         </h3>
         {definedRoles.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">No roles defined yet.</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400 italic">No roles defined yet.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {definedRoles.map((role) => (
               <span
                 key={role}
-                className="inline-flex items-center bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded-full"
+                className="inline-flex items-center bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm font-medium px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800"
               >
                 {role}
                 <button
                   onClick={() => deleteRole(role)}
-                  className="ml-1.5 flex-shrink-0 p-0.5 rounded-full inline-flex items-center justify-center text-gray-500 hover:bg-red-200 hover:text-red-700 focus:outline-none focus:bg-red-500 focus:text-white"
+                  className="ml-2 flex-shrink-0 p-0.5 rounded-full inline-flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-red-200 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                   aria-label={`Delete role ${role}`}
                 >
                   <svg
@@ -54,19 +54,19 @@ function RoleManager() {
       </div>
       <form
         onSubmit={handleAddSubmit}
-        className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200"
+        className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-slate-600"
       >
         <input
           type="text"
           value={newRoleName}
           onChange={(e) => setNewRoleName(e.target.value)}
           placeholder="Enter new role name"
-          className="flex-grow mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="flex-grow block w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 sm:text-sm"
           required
         />
         <button
           type="submit"
-          className="px-4 py-2 text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500"
+          className="px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-green-400 transition-all duration-200"
         >
           Add
         </button>

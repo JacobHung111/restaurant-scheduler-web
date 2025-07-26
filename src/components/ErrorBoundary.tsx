@@ -53,8 +53,8 @@ class ErrorBoundary extends Component<Props, State> {
 
       // Default error UI
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-lg shadow-lg p-6">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                 <svg
@@ -72,20 +72,20 @@ class ErrorBoundary extends Component<Props, State> {
                 </svg>
               </div>
               
-              <h2 className="text-lg font-medium text-gray-900 mb-2">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">
                 Something went wrong
               </h2>
               
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-sm text-gray-600 dark:text-slate-300 mb-6">
                 We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists.
               </p>
 
               {import.meta.env.MODE === 'development' && this.state.error && (
                 <details className="mb-6 text-left">
-                  <summary className="cursor-pointer text-sm font-medium text-gray-700 mb-2">
+                  <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                     Error Details (Development)
                   </summary>
-                  <div className="bg-gray-100 p-3 rounded text-xs text-gray-800 overflow-auto max-h-32">
+                  <div className="bg-gray-100 dark:bg-slate-700 p-3 rounded text-xs text-gray-800 dark:text-slate-200 overflow-auto max-h-32">
                     <div className="font-medium mb-1">Error:</div>
                     <div className="mb-2">{this.state.error.message}</div>
                     <div className="font-medium mb-1">Stack:</div>
@@ -97,13 +97,13 @@ class ErrorBoundary extends Component<Props, State> {
               <div className="flex space-x-3">
                 <button
                   onClick={this.handleReset}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="flex-1 bg-blue-600 dark:bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2"
                 >
                   Try Again
                 </button>
                 <button
                   onClick={this.handleReload}
-                  className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="flex-1 bg-gray-600 dark:bg-slate-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-700 dark:hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-slate-400 focus:ring-offset-2"
                 >
                   Reload Page
                 </button>

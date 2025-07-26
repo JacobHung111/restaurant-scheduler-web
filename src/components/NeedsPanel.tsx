@@ -26,8 +26,8 @@ function NeedsPanel({
   onNoDataToExport,
 }: NeedsPanelProps) {
   return (
-    <div className="p-4 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">Weekly Needs</h2>
+    <div className="p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+      <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-slate-100">Weekly Needs</h2>
       <ImportExportButtons
         dataType="Weekly Needs"
         dataToExport={weeklyNeeds}

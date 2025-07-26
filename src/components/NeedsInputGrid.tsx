@@ -55,15 +55,15 @@ function NeedsInputGrid({
       {DAYS_OF_WEEK.map((day) => (
         <div
           key={day}
-          className="day-needs border border-gray-200 p-4 rounded-lg bg-white shadow hover:shadow-md transition-shadow duration-200 w-72 sm:w-80 flex-shrink-0 lg:w-auto"
+          className="day-needs border border-gray-200 dark:border-slate-700 p-4 rounded-lg bg-white dark:bg-slate-800 shadow hover:shadow-md transition-shadow duration-200 w-72 sm:w-80 flex-shrink-0 lg:w-auto"
         >
-          <h4 className="text-md font-semibold mb-3 text-center text-indigo-700 border-b border-gray-200 pb-2">
+          <h4 className="text-md font-semibold mb-3 text-center text-indigo-700 dark:text-blue-400 border-b border-gray-200 dark:border-slate-600 pb-2">
             {day}
           </h4>
           <div className="space-y-4">
             {SHIFT_TYPES.map((shiftType) => (
               <div key={shiftType} className="shift-needs">
-                <h5 className="text-sm font-medium mb-2 text-gray-600">
+                <h5 className="text-sm font-medium mb-2 text-gray-600 dark:text-slate-300">
                   {SHIFT_TYPE_LABELS[shiftType]}
                 </h5>
                 <div className="space-y-1.5">
@@ -78,7 +78,7 @@ function NeedsInputGrid({
                       >
                         <label
                           htmlFor={inputId}
-                          className="text-xs text-gray-600 w-16 text-right mr-1 shrink-0"
+                          className="text-xs text-gray-600 dark:text-slate-300 w-16 text-right mr-1 shrink-0"
                         >
                           {role}:
                         </label>
@@ -93,7 +93,7 @@ function NeedsInputGrid({
                           data-day={day}
                           data-shift-type={shiftType}
                           data-role={role}
-                          className="w-16 px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-center transition duration-150 ease-in-out hover:border-gray-400"
+                          className="w-16 px-2 py-1 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-blue-400 focus:border-indigo-500 dark:focus:border-blue-400 sm:text-sm text-center transition duration-150 ease-in-out hover:border-gray-400 dark:hover:border-slate-500"
                         />
                       </div>
                     );

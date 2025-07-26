@@ -648,15 +648,15 @@ function App() {
   }, [scheduleStore, handleDragDropUpload]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-4">
       {/* Full Page Drag & Drop Overlay */}
       {isDragOverPage && (
-        <div className="fixed inset-0 z-50 bg-gray-900 bg-opacity-75 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-8 max-w-md mx-4">
+        <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 p-8 max-w-md mx-4">
             <div className="text-center">
-              <div className="mx-auto w-16 h-16 mb-4 flex items-center justify-center bg-gray-50 rounded-full">
+              <div className="mx-auto w-16 h-16 mb-4 flex items-center justify-center bg-blue-50 dark:bg-slate-700/50 rounded-full">
                 <svg
-                  className="w-8 h-8 text-gray-600 animate-bounce"
+                  className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-bounce"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -669,15 +669,15 @@ function App() {
                   />
                 </svg>
               </div>
-              <h2 className="text-xl font-medium text-gray-900 mb-2">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100 mb-2">
                 Release to Upload
               </h2>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
                 Drop your JSON file to import data
               </p>
-              <div className="inline-flex items-center px-3 py-1 bg-gray-100 border border-gray-200 rounded-lg">
+              <div className="inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-slate-700/50 border border-blue-200 dark:border-slate-600 rounded-lg">
                 <svg
-                  className="w-4 h-4 text-gray-500 mr-2"
+                  className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -689,7 +689,7 @@ function App() {
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <span className="text-gray-600 text-sm font-medium">JSON files only</span>
+                <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">JSON files only</span>
               </div>
             </div>
           </div>
@@ -699,10 +699,10 @@ function App() {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">
             Restaurant Scheduler
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
             Manage staff, define needs, and generate weekly work schedules
           </p>
           
@@ -720,17 +720,17 @@ function App() {
 
         {/* Main Tab Interface */}
         <TabGroup>
-          <TabList className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
+          <TabList className="flex space-x-1 rounded-xl bg-blue-100 dark:bg-slate-800 p-1">
             {["Staff", "Unavailability", "Needs", "Schedule"].map((tab) => (
               <Tab
                 key={tab}
                 className={({ selected }) =>
                   classNames(
-                    "w-full rounded-lg py-2.5 text-sm font-medium leading-5",
-                    "ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2",
+                    "w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-all duration-200",
+                    "ring-blue-500/50 dark:ring-blue-400/50 ring-offset-2 ring-offset-transparent focus:outline-none focus:ring-2",
                     selected
-                      ? "bg-white text-blue-700 shadow"
-                      : "text-blue-100 hover:bg-white/[0.12] hover:text-white"
+                      ? "bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 shadow-sm"
+                      : "text-blue-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/50 hover:text-blue-800 dark:hover:text-slate-200"
                   )
                 }
               >
@@ -792,17 +792,17 @@ function App() {
                 />
 
                 {/* Schedule Preferences */}
-                <div className="rounded-lg bg-white p-6 shadow">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <div className="rounded-xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-gray-200 dark:border-slate-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">
                     Schedule Preferences
                   </h3>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {[
                       { value: "PRIORITIZE_FULL_DAYS", label: "Prioritize Full Days" },
                       { value: "PRIORITIZE_HALF_DAYS", label: "Prioritize Half Days" },
                       { value: "NONE", label: "No Preference" },
                     ].map((option) => (
-                      <label key={option.value} className="flex items-center">
+                      <label key={option.value} className="flex items-center cursor-pointer">
                         <input
                           type="radio"
                           name="shiftPreference"
@@ -813,9 +813,9 @@ function App() {
                               e.target.value as "PRIORITIZE_FULL_DAYS" | "PRIORITIZE_HALF_DAYS" | "NONE"
                             )
                           }
-                          className="mr-2"
+                          className="mr-3 h-4 w-4 text-blue-600 dark:text-blue-400 border-gray-300 dark:border-slate-600 dark:bg-slate-700 focus:ring-blue-500 dark:focus:ring-blue-400"
                         />
-                        {option.label}
+                        <span className="text-gray-900 dark:text-slate-100">{option.label}</span>
                       </label>
                     ))}
                   </div>
@@ -826,7 +826,7 @@ function App() {
                   <button
                     onClick={handleGenerateSchedule}
                     disabled={scheduleStore.isLoading}
-                    className="rounded-md bg-blue-600 px-8 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+                    className="rounded-lg bg-blue-600 dark:bg-blue-500 px-8 py-3 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-200 shadow-sm"
                   >
                     {scheduleStore.isLoading ? "Generating..." : "Generate Weekly Schedule"}
                   </button>

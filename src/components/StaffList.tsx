@@ -45,15 +45,15 @@ function StaffList({
   };
 
   return (
-    <div className="mt-6 border-t border-gray-200 pt-4">
-      <h3 className="text-lg font-semibold mb-3 text-gray-700">
+    <div className="mt-6 border-t border-gray-200 dark:border-slate-600 pt-4">
+      <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-slate-100">
         Staff List ({staffList.length})
-        <span className="text-sm font-normal text-gray-500 ml-2">
+        <span className="text-sm font-normal text-gray-500 dark:text-slate-400 ml-2">
           (Drag handle to reorder priority)
         </span>
       </h3>
       {staffList.length === 0 ? (
-        <p className="text-sm text-gray-500 italic">
+        <p className="text-sm text-gray-500 dark:text-slate-400 italic">
           No staff added yet. Use the form above.
         </p>
       ) : (

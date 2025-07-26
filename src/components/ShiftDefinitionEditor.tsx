@@ -74,18 +74,18 @@ function ShiftDefinitionEditor({
   }, [updateDefinitions]);
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow mb-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">
+    <div className="p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 mb-6">
+      <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-slate-100">
         Define Shift Times
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
         {/* AM Shift */}
-        <fieldset className="border p-3 rounded border-gray-300">
-          <legend className="text-sm font-medium text-indigo-600 px-1">
+        <fieldset className="border p-4 rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50/30 dark:bg-slate-700/30">
+          <legend className="text-sm font-medium text-blue-600 dark:text-blue-400 px-2">
             AM Shift (e.g., Morning)
           </legend>
           <div className="flex items-center space-x-2">
-            <label htmlFor="am-start" className="text-sm w-12 text-right">
+            <label htmlFor="am-start" className="text-sm w-12 text-right text-gray-700 dark:text-slate-300">
               Start:
             </label>
             <input
@@ -94,11 +94,11 @@ function ShiftDefinitionEditor({
               value={amStart}
               onChange={(e) => setAmStart(e.target.value)}
               required
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 sm:text-sm"
             />
           </div>
           <div className="flex items-center space-x-2 mt-2">
-            <label htmlFor="am-end" className="text-sm w-12 text-right">
+            <label htmlFor="am-end" className="text-sm w-12 text-right text-gray-700 dark:text-slate-300">
               End:
             </label>
             <input
@@ -107,21 +107,21 @@ function ShiftDefinitionEditor({
               value={amEnd}
               onChange={(e) => setAmEnd(e.target.value)}
               required
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 sm:text-sm"
             />
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2">
             Hours: {calculateHours(amStart, amEnd).toFixed(1)}
           </p>
         </fieldset>
 
         {/* PM Shift */}
-        <fieldset className="border p-3 rounded border-gray-300">
-          <legend className="text-sm font-medium text-indigo-600 px-1">
+        <fieldset className="border p-4 rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50/30 dark:bg-slate-700/30">
+          <legend className="text-sm font-medium text-blue-600 dark:text-blue-400 px-2">
             PM Shift (e.g., Evening)
           </legend>
           <div className="flex items-center space-x-2">
-            <label htmlFor="pm-start" className="text-sm w-12 text-right">
+            <label htmlFor="pm-start" className="text-sm w-12 text-right text-gray-700 dark:text-slate-300">
               Start:
             </label>
             <input
@@ -130,17 +130,17 @@ function ShiftDefinitionEditor({
               value={pmStart}
               onChange={(e) => setPmStart(e.target.value)}
               required
-              className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+              className={`block w-full rounded-lg shadow-sm sm:text-sm ${
                 amEnd !== pmStart &&
                 isValidTimeFormat(pmStart) &&
                 isValidTimeFormat(amEnd)
-                  ? "border-red-500 ring-red-500"
-                  : ""
+                  ? "border-red-500 dark:border-red-400 ring-red-500 dark:ring-red-400 dark:bg-slate-700 dark:text-slate-100"
+                  : "border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               }`}
             />
           </div>
           <div className="flex items-center space-x-2 mt-2">
-            <label htmlFor="pm-end" className="text-sm w-12 text-right">
+            <label htmlFor="pm-end" className="text-sm w-12 text-right text-gray-700 dark:text-slate-300">
               End:
             </label>
             <input
@@ -149,25 +149,25 @@ function ShiftDefinitionEditor({
               value={pmEnd}
               onChange={(e) => setPmEnd(e.target.value)}
               required
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 sm:text-sm"
             />
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2">
             Hours: {calculateHours(pmStart, pmEnd).toFixed(1)}
           </p>
         </fieldset>
 
         {/* Full Day Info */}
-        <div className="md:col-span-2 mt-2 text-sm text-center text-gray-600 bg-gray-100 p-2 rounded">
-          Full Day Shift: {amStart} - {pmEnd} (
+        <div className="md:col-span-2 mt-4 text-sm text-center text-gray-700 dark:text-slate-300 bg-blue-50 dark:bg-slate-700/50 p-3 rounded-lg border border-blue-200 dark:border-slate-600">
+          <strong>Full Day Shift:</strong> {amStart} - {pmEnd} (
           {calculateHours(amStart, pmEnd).toFixed(1)} hours)
         </div>
 
         {/* Validation Error Display */}
         {validationError && (
-          <p className="md:col-span-2 text-sm text-red-600 text-center mt-2">
+          <div className="md:col-span-2 text-sm text-red-600 dark:text-red-400 text-center mt-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             {validationError}
-          </p>
+          </div>
         )}
       </div>
     </div>

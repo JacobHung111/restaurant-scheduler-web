@@ -50,7 +50,7 @@ function SortableRoleItem({ role, onRemove }: SortableRoleItemProps) {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className={`flex items-center justify-between p-1.5 pl-2 bg-gray-100 rounded border text-sm ${
+      className={`flex items-center justify-between p-1.5 pl-2 bg-gray-100 dark:bg-slate-700 rounded border dark:border-slate-600 text-sm text-gray-900 dark:text-slate-100 ${
         isDragging ? "shadow-md" : ""
       }`}
     >
@@ -58,7 +58,7 @@ function SortableRoleItem({ role, onRemove }: SortableRoleItemProps) {
       <button
         type="button"
         {...listeners}
-        className="p-0.5 cursor-grab text-gray-400 hover:text-gray-600 mr-2"
+        className="p-0.5 cursor-grab text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-400 mr-2"
         aria-label="Drag to reorder role"
       >
         <svg
@@ -87,7 +87,7 @@ function SortableRoleItem({ role, onRemove }: SortableRoleItemProps) {
       <button
         type="button"
         onClick={() => onRemove(role)}
-        className="ml-2 p-0.5 rounded-full text-red-500 hover:bg-red-100"
+        className="ml-2 p-0.5 rounded-full text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
         aria-label={`Remove role ${role}`}
       >
         <svg
@@ -161,7 +161,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
 
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">
+      <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-slate-100 border-b dark:border-slate-600 pb-2">
         Add New Staff
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -169,7 +169,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
         <div>
           <label
             htmlFor="staff-name-input"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-1"
           >
             Staff Name:
           </label>
@@ -179,14 +179,14 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-lg border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 sm:text-sm"
           />
         </div>
         {/* --- Role Assignment and Priority --- */}
-        <div className="grid grid-cols-2 gap-4 border p-3 rounded border-gray-200 bg-gray-50/50">
+        <div className="grid grid-cols-2 gap-4 border dark:border-slate-600 p-3 rounded-lg border-gray-200 bg-gray-50/50 dark:bg-slate-700/30">
           {/* Left: Available Roles */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">
               Available Roles:
             </label>
             {availableRoles.length > 0 ? (
@@ -196,11 +196,11 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
                     key={role}
                     className="text-sm flex justify-between items-center"
                   >
-                    <span>{role}</span>
+                    <span className="text-gray-900 dark:text-slate-100">{role}</span>
                     <button
                       type="button"
                       onClick={() => handleAddRoleToPriority(role)}
-                      className="text-xs text-indigo-600 hover:text-indigo-900 font-medium"
+                      className="text-xs text-indigo-600 dark:text-blue-400 hover:text-indigo-900 dark:hover:text-blue-300 font-medium"
                     >
                       Add »
                     </button>
@@ -208,14 +208,14 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
                 ))}
               </ul>
             ) : (
-              <p className="text-xs text-gray-500 italic">
+              <p className="text-xs text-gray-500 dark:text-slate-400 italic">
                 All defined roles are assigned.
               </p>
             )}
           </div>
           {/* Right: Assigned Roles (Sortable) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
               Assigned & Prioritized Roles:
             </label>
             {priorityRoles.length > 0 ? (
@@ -240,7 +240,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
                 </SortableContext>
               </DndContext>
             ) : (
-              <p className="text-xs text-gray-500 italic">
+              <p className="text-xs text-gray-500 dark:text-slate-400 italic">
                 Add roles from the left. Drag to reorder (top is highest
                 priority).
               </p>
@@ -252,7 +252,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
           <div>
             <label
               htmlFor="staff-min-hours-form"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
             >
               Min Weekly Hours (Optional):
             </label>
@@ -263,13 +263,13 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
               onChange={(e) => setMinHours(e.target.value)}
               min="0"
               step="0.5"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-indigo-500 dark:focus:border-blue-400 focus:ring-indigo-500 dark:focus:ring-blue-400 sm:text-sm"
             />
           </div>
           <div>
             <label
               htmlFor="staff-max-hours-form"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
             >
               Max Weekly Hours (Optional):
             </label>
@@ -280,7 +280,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
               onChange={(e) => setMaxHours(e.target.value)}
               min="0"
               step="0.5"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-indigo-500 dark:focus:border-blue-400 focus:ring-indigo-500 dark:focus:ring-blue-400 sm:text-sm"
             />
           </div>
         </div>
@@ -289,7 +289,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
           {" "}
           <button
             type="submit"
-            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 dark:bg-blue-600 hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-400 transition duration-150 ease-in-out"
           >
             Add Staff
           </button>

@@ -29,10 +29,10 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
     <li
       ref={setNodeRef}
       style={style}
-      className={`flex items-center justify-between p-3 rounded border border-gray-200 transition-shadow duration-150 ease-in-out ${
+      className={`flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-slate-700 transition-all duration-200 ${
         isDragging
-          ? "shadow-lg bg-white opacity-75"
-          : "bg-white hover:bg-gray-50"
+          ? "shadow-lg bg-white dark:bg-slate-800 opacity-75"
+          : "bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700"
       }`}
       {...attributes}
     >
@@ -40,7 +40,7 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
       <button
         {...listeners}
         type="button"
-        className="p-1 cursor-grab text-gray-400 hover:text-gray-600 mr-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded" // Added focus style
+        className="p-1 cursor-grab text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-400 mr-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 rounded transition-colors duration-200"
         aria-label="Drag to reorder"
       >
         <svg
@@ -66,14 +66,14 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
       </button>
 
       {/* Staff Info */}
-      <div className="text-sm text-gray-800 flex-grow mr-2">
-        <div className="font-medium text-gray-900">
+      <div className="text-sm text-gray-800 dark:text-slate-200 flex-grow mr-2">
+        <div className="font-medium text-gray-900 dark:text-slate-100">
           {staff.name}{" "}
-          <span className="staff-id-display text-xs text-gray-400">
+          <span className="staff-id-display text-xs text-gray-400 dark:text-slate-500">
             ({staff.id})
           </span>
         </div>
-        <div className="text-xs text-gray-500 mt-0.5">
+        <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
           <span className="font-medium">Roles:</span>{" "}
           {staff.assignedRolesInPriority.join(", ")}
           {staff.minHoursPerWeek != null ? (
@@ -96,7 +96,7 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
       {/* Delete Button */}
       <button
         onClick={() => onDeleteStaff(staff.id)}
-        className="ml-auto px-2.5 py-1 text-xs font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 flex-shrink-0 transition duration-150 ease-in-out" // Added transition
+        className="ml-auto px-2.5 py-1 text-xs font-medium text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 dark:focus:ring-red-400 flex-shrink-0 transition-all duration-200"
         aria-label={`Delete ${staff.name}`}
       >
         Delete

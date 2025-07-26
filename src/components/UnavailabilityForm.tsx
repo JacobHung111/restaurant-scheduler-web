@@ -80,7 +80,7 @@ function UnavailabilityForm({
         <div>
           <label
             htmlFor="unav-staff-select-form"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
           >
             Select Staff:
           </label>
@@ -89,7 +89,7 @@ function UnavailabilityForm({
             value={selectedStaffId}
             onChange={(e) => setSelectedStaffId(e.target.value)}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white"
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-indigo-500 dark:focus:border-blue-400 focus:ring-indigo-500 dark:focus:ring-blue-400 sm:text-sm bg-white"
           >
             <option value="" disabled>
               -- Select Staff --
@@ -106,7 +106,7 @@ function UnavailabilityForm({
         <div>
           <label
             htmlFor="unav-day-select-form"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
           >
             Select Day:
           </label>
@@ -115,7 +115,7 @@ function UnavailabilityForm({
             value={selectedDay}
             onChange={(e) => setSelectedDay(e.target.value)}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white"
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-indigo-500 dark:focus:border-blue-400 focus:ring-indigo-500 dark:focus:ring-blue-400 sm:text-sm bg-white"
           >
             <option value="" disabled>
               -- Select Day --
@@ -130,7 +130,7 @@ function UnavailabilityForm({
 
         {/* Shift Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
             Select Unavailable Shifts:
           </label>
           <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -150,11 +150,11 @@ function UnavailabilityForm({
                         s.start === shiftOpt.start && s.end === shiftOpt.end
                     )}
                     onChange={handleShiftChange}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-indigo-600 dark:text-blue-500 focus:ring-indigo-500 dark:focus:ring-blue-400 dark:bg-slate-700"
                   />
                   <label
                     htmlFor={`unav-${shiftValue}-form`}
-                    className="ml-2 block text-sm text-gray-900"
+                    className="ml-2 block text-sm text-gray-900 dark:text-slate-200"
                   >
                     {shiftLabel}
                   </label>
@@ -168,7 +168,7 @@ function UnavailabilityForm({
         <div>
           <button
             type="submit"
-            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 dark:bg-blue-600 hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-400 transition duration-150 ease-in-out"
           >
             Add Unavailability
           </button>
