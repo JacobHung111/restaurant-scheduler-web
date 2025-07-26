@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useRef } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import type { StaffMember, Unavailability, WeeklyNeeds } from "./types";
 import StaffPanel from "./components/StaffPanel";
@@ -28,6 +28,10 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 function App() {
   // --- File Input Ref for Universal Import ---
   const universalImportFileRef = useRef<HTMLInputElement>(null);
+
+  // --- Full Page Drag & Drop State ---
+  const [isDragOverPage, setIsDragOverPage] = useState(false);
+  const [, setDragCounter] = useState(0);
 
   // --- Optimized Zustand Selectors ---
   const staffStore = useStaffSelectors();
@@ -66,7 +70,7 @@ function App() {
     }
   };
 
-  const handleImportStaffData = (data: unknown[]) => {
+  const handleImportStaffData = useCallback((data: unknown[]) => {
     try {
       const staffList = data as StaffMember[];
       staffStore.setStaffList(staffList);
@@ -86,9 +90,9 @@ function App() {
       );
       logger.error("Import error:", error);
     }
-  };
+  }, [staffStore, scheduleStore]);
 
-  const handleImportUnavailabilityData = (data: unknown[]) => {
+  const handleImportUnavailabilityData = useCallback((data: unknown[]) => {
     try {
       const unavailabilityList = data as Unavailability[];
       unavailabilityStore.setUnavailabilityList(unavailabilityList);
@@ -108,9 +112,9 @@ function App() {
       );
       logger.error("Import error:", error);
     }
-  };
+  }, [unavailabilityStore, scheduleStore]);
 
-  const handleImportNeedsData = (data: unknown) => {
+  const handleImportNeedsData = useCallback((data: unknown) => {
     try {
       const weeklyNeeds = data as WeeklyNeeds;
       scheduleStore.setWeeklyNeeds(weeklyNeeds);
@@ -135,7 +139,7 @@ function App() {
       );
       logger.error("Import error:", error);
     }
-  };
+  }, [scheduleStore]);
 
   // --- Export Handlers for Individual Components ---
   const handleExportSuccess = (fileName: string, dataType: string) => {
@@ -284,6 +288,7 @@ function App() {
     reader.readAsText(file);
   };
 
+
   // --- Bulk Export Handler ---
   const handleBulkExport = () => {
     try {
@@ -363,7 +368,7 @@ function App() {
   };
 
   // --- Bulk Import Handler ---
-  const handleBulkImport = (data: BulkImportData, updateMode: 'replace' | 'merge') => {
+  const handleBulkImport = useCallback((data: BulkImportData, updateMode: 'replace' | 'merge') => {
     try {
       const importSummary: string[] = [];
 
@@ -461,10 +466,236 @@ function App() {
       );
       logger.error("Bulk import error:", error);
     }
-  };
+  }, [staffStore, unavailabilityStore, scheduleStore]);
+
+  // --- Drag Drop Upload Handler ---
+  const handleDragDropUpload = useCallback((file: File) => {
+    if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+      scheduleStore.showMessage(
+        'error',
+        'Invalid File Type',
+        'Please drop a valid JSON file (.json).'
+      );
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const result = e.target?.result;
+        if (typeof result !== 'string') {
+          throw new Error('Failed to read file content.');
+        }
+
+        const rawData = JSON.parse(result);
+        
+        // Use the same detection logic as universal import
+        const isBulkFormat = Object.prototype.hasOwnProperty.call(rawData, 'staffList') || 
+                            Object.prototype.hasOwnProperty.call(rawData, 'unavailabilityList') || 
+                            Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds');
+        
+        const isStaffArray = Array.isArray(rawData) && rawData.length > 0 && 
+                            Object.prototype.hasOwnProperty.call(rawData[0], 'id') && Object.prototype.hasOwnProperty.call(rawData[0], 'name');
+        
+        const isUnavailabilityArray = Array.isArray(rawData) && rawData.length > 0 && 
+                                     Object.prototype.hasOwnProperty.call(rawData[0], 'employeeId') && Object.prototype.hasOwnProperty.call(rawData[0], 'dayOfWeek');
+        
+        const isWeeklyNeedsObject = !Array.isArray(rawData) && typeof rawData === 'object' && 
+                                   Object.keys(rawData).some(key => 
+                                     typeof rawData[key] === 'object' && 
+                                     Object.keys(rawData[key]).some(shiftKey => 
+                                       typeof rawData[key][shiftKey] === 'object'
+                                     )
+                                   );
+
+        if (isBulkFormat) {
+          const validation = validateBulkImportData(rawData);
+          
+          if (validation.isValid) {
+            const relationshipWarnings = validateDataRelationships(validation.data);
+            validation.warnings.push(...relationshipWarnings);
+          }
+
+          if (!validation.isValid) {
+            scheduleStore.showMessage(
+              'error',
+              'Drag & Drop Import Failed', 
+              'Invalid bulk data format in JSON file.',
+              validation.errors
+            );
+            return;
+          }
+
+          handleBulkImport(validation.data, 'replace');
+          
+        } else if (isStaffArray) {
+          handleImportStaffData(rawData);
+        } else if (isUnavailabilityArray) {
+          handleImportUnavailabilityData(rawData);
+        } else if (isWeeklyNeedsObject) {
+          handleImportNeedsData(rawData);
+        } else {
+          scheduleStore.showMessage(
+            'error',
+            'Drag & Drop Import Failed',
+            'Unable to recognize the JSON data format.',
+            [
+              'Supported formats:',
+              '• Bulk data export (containing staffList, unavailabilityList, or weeklyNeeds)',
+              '• Staff array with id and name fields',
+              '• Unavailability array with employeeId and dayOfWeek fields',
+              '• Weekly needs object with day/shift/role structure'
+            ]
+          );
+        }
+
+        logger.log('File imported via drag & drop:', file.name);
+        
+      } catch (error) {
+        scheduleStore.showMessage(
+          'error',
+          'Drag & Drop Import Failed',
+          'Failed to parse JSON file. Please check the file format.',
+          [error instanceof Error ? error.message : 'Unknown parsing error']
+        );
+        logger.error('Drag & drop import error:', error);
+      }
+    };
+
+    reader.onerror = () => {
+      scheduleStore.showMessage(
+        'error',
+        'File Read Error',
+        'Failed to read the dropped file. Please try again.'
+      );
+    };
+
+    reader.readAsText(file);
+  }, [scheduleStore, handleImportStaffData, handleImportUnavailabilityData, handleImportNeedsData, handleBulkImport]);
+
+  // --- Setup Full Page Drag & Drop Event Listeners ---
+  useEffect(() => {
+    const handlePageDragEnterWrapper = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragCounter(prev => prev + 1);
+      
+      // Check if dragged items contain files
+      if (e.dataTransfer?.types.includes('Files')) {
+        setIsDragOverPage(true);
+      }
+    };
+
+    const handlePageDragLeaveWrapper = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragCounter(prev => {
+        const newCounter = prev - 1;
+        if (newCounter === 0) {
+          setIsDragOverPage(false);
+        }
+        return newCounter;
+      });
+    };
+
+    const handlePageDragOverWrapper = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handlePageDropWrapper = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      setIsDragOverPage(false);
+      setDragCounter(0);
+
+      const files = Array.from(e.dataTransfer?.files || []);
+      
+      if (files.length === 0) return;
+
+      // Filter for JSON files only
+      const jsonFiles = files.filter(file => 
+        file.type === 'application/json' || file.name.endsWith('.json')
+      );
+
+      if (jsonFiles.length === 0) {
+        scheduleStore.showMessage(
+          'error',
+          'Invalid File Type',
+          'Please drop JSON files only (.json).'
+        );
+        return;
+      }
+
+      // Process the first JSON file found
+      handleDragDropUpload(jsonFiles[0]);
+    };
+
+    // Add event listeners to document
+    document.addEventListener('dragenter', handlePageDragEnterWrapper);
+    document.addEventListener('dragleave', handlePageDragLeaveWrapper);
+    document.addEventListener('dragover', handlePageDragOverWrapper);
+    document.addEventListener('drop', handlePageDropWrapper);
+
+    // Cleanup event listeners on unmount
+    return () => {
+      document.removeEventListener('dragenter', handlePageDragEnterWrapper);
+      document.removeEventListener('dragleave', handlePageDragLeaveWrapper);
+      document.removeEventListener('dragover', handlePageDragOverWrapper);
+      document.removeEventListener('drop', handlePageDropWrapper);
+    };
+  }, [scheduleStore, handleDragDropUpload]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
+      {/* Full Page Drag & Drop Overlay */}
+      {isDragOverPage && (
+        <div className="fixed inset-0 z-50 bg-gray-900 bg-opacity-75 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-8 max-w-md mx-4">
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 mb-4 flex items-center justify-center bg-gray-50 rounded-full">
+                <svg
+                  className="w-8 h-8 text-gray-600 animate-bounce"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-medium text-gray-900 mb-2">
+                Release to Upload
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Drop your JSON file to import data
+              </p>
+              <div className="inline-flex items-center px-3 py-1 bg-gray-100 border border-gray-200 rounded-lg">
+                <svg
+                  className="w-4 h-4 text-gray-500 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <span className="text-gray-600 text-sm font-medium">JSON files only</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8 text-center">
