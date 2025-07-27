@@ -25,6 +25,7 @@ interface ScheduleState {
 
   // Actions
   setSchedule: (schedule: Schedule | null) => void;
+  setGeneratedSchedule: (schedule: Schedule | null) => void; // Alias for consistency
   setWarnings: (warnings: string[]) => void;
   setIsLoading: (isLoading: boolean) => void;
   setWeeklyNeeds: (weeklyNeeds: WeeklyNeeds) => void;
@@ -61,6 +62,10 @@ export const useScheduleStore = create<ScheduleState>()((set) => ({
 
   // Schedule management actions
   setSchedule: (schedule) => {
+    set({ schedule });
+  },
+
+  setGeneratedSchedule: (schedule) => {
     set({ schedule });
   },
 

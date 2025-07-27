@@ -94,6 +94,14 @@ User Input → Store Action → OperationResult → Component Handler → Messag
 - `toggleTheme() → void` - Cycle through Light → Dark → System
 - Auto-saves to localStorage with key 'restaurant-scheduler-settings'
 
+### useHistoryStore
+- `records: HistoryRecord[]` - Saved history records (max 3)
+- `saveRecord(data) → OperationResult` - Save complete application state
+- `deleteRecord(id) → OperationResult` - Remove specific record
+- `loadRecord(id) → OperationResult` - Load saved state
+- `clearAllRecords() → OperationResult` - Remove all records
+- Auto-saves to localStorage with key 'restaurant-scheduler-history'
+
 ## Key Components
 
 ### StaffForm & StaffList
@@ -122,6 +130,14 @@ User Input → Store Action → OperationResult → Component Handler → Messag
 - Visual icons for each theme state
 - Integrated with useSettingsStore
 - Persistent theme selection with system detection
+
+### HistoryPanel
+- Save complete application state when schedule is generated
+- Maximum 3 records with datetime naming (YYYY-MM-DD HH:MM)
+- Mobile-responsive with collapsible interface
+- One-click record loading and deletion with confirmation
+- Dark mode compatible with full accessibility support
+- Fixed positioning (top-right) with z-index management
 
 ## Data Import/Export
 
@@ -356,9 +372,12 @@ src/
 │   ├── useStaffStore.ts
 │   ├── useUnavailabilityStore.ts
 │   ├── useScheduleStore.ts
-│   └── useSettingsStore.ts    # Theme management
+│   ├── useSettingsStore.ts    # Theme management
+│   └── useHistoryStore.ts     # History records with localStorage
 ├── components/       # React components with TypeScript
 │   ├── ThemeToggle.tsx        # Theme switching component
+│   ├── HistoryPanel.tsx       # History management (mobile + dark mode)
+│   ├── ConfirmDialog.tsx      # Confirmation dialogs (dark mode)
 │   └── MessageModal.tsx       # Dark mode compatible
 ├── hooks/           # Custom hooks for store selectors
 ├── utils/           # logger, validation, helpers

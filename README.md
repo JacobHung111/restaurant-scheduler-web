@@ -7,6 +7,7 @@ A production-ready React 19 restaurant staff scheduling application that intelli
 - **Smart Staff Management** - Role assignments with drag-and-drop priority ordering
 - **Intelligent Scheduling** - AI-powered schedule generation with conflict resolution
 - **Universal Data Import** - Auto-detects and handles multiple JSON formats
+- **History Management** - Save and restore complete application states (max 3 records)
 - **Complete Dark Mode** - Full light/dark/system theme support with persistent storage
 - **Real-time Validation** - Immediate feedback with comprehensive error handling
 - **Accessibility First** - Full keyboard navigation and screen reader support
@@ -80,10 +81,13 @@ npm run preview  # Preview production build locally
 4. **Set Availability** - Define when staff are unavailable
 5. **Configure Needs** - Specify required staff per day/shift/role
 6. **Generate Schedule** - AI creates optimized weekly assignments
+7. **Save History** - Save complete state for future reference (max 3 records)
 
 ### Data Management
 - **Universal Import** - Automatically detects JSON format types
 - **Smart Export** - Export individual data types or complete backup
+- **History Records** - Save/restore complete application states with datetime stamps
+- **Storage Limits** - Maximum 3 history records with automatic cleanup prompts
 - **Format Support** - Staff arrays, bulk data, weekly needs objects
 - **Validation** - Comprehensive type checking and error recovery
 
@@ -128,10 +132,13 @@ src/
 │   ├── useStaffStore.ts        # Staff and roles with validation
 │   ├── useUnavailabilityStore.ts # Availability with conflict detection  
 │   ├── useScheduleStore.ts     # Schedule generation and MessageModal
-│   └── useSettingsStore.ts     # Theme management with localStorage
+│   ├── useSettingsStore.ts     # Theme management with localStorage
+│   └── useHistoryStore.ts      # History records with localStorage
 ├── components/          # React components with TypeScript
 │   ├── MessageModal.tsx        # Unified user feedback system (dark mode)
 │   ├── ThemeToggle.tsx         # Light/Dark/System theme switcher
+│   ├── HistoryPanel.tsx        # History management (mobile + dark mode)
+│   ├── ConfirmDialog.tsx       # Confirmation dialogs (dark mode)
 │   ├── ErrorBoundary.tsx       # Runtime error recovery (dark mode)
 │   ├── StaffForm.tsx           # Staff creation with validation (dark mode)
 │   └── [other components]      # Feature-specific UI components (all dark mode)
@@ -271,5 +278,41 @@ className="hover:bg-gray-100 dark:hover:bg-slate-700"
 - **Text**: `slate-100` (primary), `slate-300` (secondary), `slate-400` (muted)
 - **Borders**: `slate-700` (standard), `slate-600` (form elements)
 - **Accents**: `blue-600/500/400` for interactive elements in dark mode
+
+## 📚 History Management Features
+
+### Save & Restore System
+- **Complete State Storage** - Saves all application data (staff, availability, needs, schedules)
+- **Automatic Naming** - Records named with datetime format (YYYY-MM-DD HH:MM)
+- **Storage Limit** - Maximum 3 records with user-friendly limit warnings
+- **One-Click Loading** - Instantly restore any saved state
+- **Confirmation Dialogs** - Safe deletion with confirmation prompts
+
+### Mobile-First Design
+- **Collapsible Interface** - Expandable panel on mobile devices
+- **Touch-Friendly** - Large touch targets and swipe gestures
+- **Responsive Layout** - Adapts to screen size with optimized spacing
+- **Fixed Positioning** - Always accessible in top-right corner
+
+### Implementation Details
+```typescript
+// History management with useHistoryStore
+const { records, saveRecord, loadRecord, deleteRecord } = useHistoryStore();
+
+// Save current state (requires generated schedule)
+const result = saveRecord(staffList, unavailabilityList, weeklyNeeds, shiftDefinitions, schedule);
+
+// Load saved state
+const loadResult = loadRecord(recordId);
+if (loadResult.success) {
+  // All stores automatically updated
+}
+```
+
+### Storage Features
+- **localStorage Persistence** - Survives browser restarts and refreshes
+- **Automatic Cleanup** - Intelligent storage limit management
+- **Data Validation** - Comprehensive validation of saved/loaded data
+- **Error Recovery** - Graceful handling of corrupted or invalid data
 
 Built with modern React development best practices and enterprise-level quality standards.

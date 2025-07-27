@@ -10,6 +10,7 @@ import ShiftDefinitionEditor from "./components/ShiftDefinitionEditor";
 import RoleManager from "./components/RoleManager";
 import MessageModal from "./components/MessageModal";
 import DataOverview from "./components/DataOverview";
+import HistoryPanel from "./components/HistoryPanel";
 import { useScheduleGeneration } from "./hooks/useScheduleGeneration";
 import { 
   useStaffSelectors, 
@@ -32,6 +33,9 @@ function App() {
   // --- Full Page Drag & Drop State ---
   const [isDragOverPage, setIsDragOverPage] = useState(false);
   const [, setDragCounter] = useState(0);
+  
+  // --- History Panel State ---
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // --- Optimized Zustand Selectors ---
   const staffStore = useStaffSelectors();
@@ -648,7 +652,7 @@ function App() {
   }, [scheduleStore, handleDragDropUpload]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-2 sm:p-4">
       {/* Full Page Drag & Drop Overlay */}
       {isDragOverPage && (
         <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center">
@@ -698,11 +702,11 @@ function App() {
 
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">
+        <div className="mb-6 sm:mb-8 text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-slate-100">
             Restaurant Scheduler
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
+          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400 px-2">
             Manage staff, define needs, and generate weekly work schedules
           </p>
           
@@ -714,19 +718,20 @@ function App() {
               weeklyNeeds={scheduleStore.weeklyNeeds}
               onBulkExport={handleBulkExport}
               onUniversalImport={handleUniversalImport}
+              onOpenHistory={() => setIsHistoryOpen(true)}
             />
           </div>
         </div>
 
         {/* Main Tab Interface */}
         <TabGroup>
-          <TabList className="flex space-x-1 rounded-xl bg-blue-100 dark:bg-slate-800 p-1">
+          <TabList className="grid grid-cols-2 sm:flex sm:space-x-1 gap-1 sm:gap-0 rounded-xl bg-blue-100 dark:bg-slate-800 p-1">
             {["Staff", "Unavailability", "Needs", "Schedule"].map((tab) => (
               <Tab
                 key={tab}
                 className={({ selected }) =>
                   classNames(
-                    "w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-all duration-200",
+                    "w-full rounded-lg py-2 sm:py-2.5 text-xs sm:text-sm font-medium leading-5 transition-all duration-200",
                     "ring-blue-500/50 dark:ring-blue-400/50 ring-offset-2 ring-offset-transparent focus:outline-none focus:ring-2",
                     selected
                       ? "bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 shadow-sm"
@@ -739,7 +744,7 @@ function App() {
             ))}
           </TabList>
 
-          <TabPanels className="mt-6">
+          <TabPanels className="mt-4 sm:mt-6">
             {/* Staff Panel */}
             <TabPanel>
               <div className="space-y-6">
@@ -851,6 +856,17 @@ function App() {
           accept=".json"
           onChange={handleUniversalImportFileChange}
           style={{ display: 'none' }}
+        />
+        
+        {/* History Panel */}
+        <HistoryPanel
+          staffList={staffStore.staffList}
+          unavailabilityList={unavailabilityStore.unavailabilityList}
+          weeklyNeeds={scheduleStore.weeklyNeeds}
+          shiftDefinitions={scheduleStore.shiftDefinitions}
+          generatedSchedule={scheduleStore.schedule}
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
         />
         
         {/* Message Modal */}
