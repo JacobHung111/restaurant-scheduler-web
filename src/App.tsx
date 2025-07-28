@@ -37,7 +37,7 @@ function App() {
   // --- History Panel State ---
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-  // --- Optimized Zustand Selectors ---
+  // --- Optimized Zustand Selectors with useShallow ---
   const staffStore = useStaffSelectors();
   const scheduleStore = useScheduleSelectors();
   const unavailabilityStore = useUnavailabilitySelectors();

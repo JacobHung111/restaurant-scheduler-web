@@ -1,9 +1,15 @@
 // src/components/ThemeToggle.tsx
 import { SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/react/24/outline';
 import { useSettingsStore } from '../stores/useSettingsStore';
+import { useShallow } from 'zustand/react/shallow';
 
 function ThemeToggle() {
-  const { theme, toggleTheme } = useSettingsStore();
+  const { theme, toggleTheme } = useSettingsStore(
+    useShallow((state) => ({
+      theme: state.theme,
+      toggleTheme: state.toggleTheme,
+    }))
+  );
 
   const getIcon = () => {
     switch (theme) {

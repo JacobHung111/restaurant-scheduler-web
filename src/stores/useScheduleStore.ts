@@ -1,5 +1,6 @@
 // src/stores/useScheduleStore.ts
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 import type { Schedule, WeeklyNeeds, ShiftDefinitions } from '../types';
 import { createInitialShiftDefinitions } from '../utils';
 
@@ -44,7 +45,8 @@ interface ScheduleState {
   resetWeeklyNeeds: () => void;
 }
 
-export const useScheduleStore = create<ScheduleState>()((set) => ({
+export const useScheduleStore = create<ScheduleState>()(
+  immer((set) => ({
   // Initial state
   schedule: null,
   warnings: [],
@@ -79,35 +81,33 @@ export const useScheduleStore = create<ScheduleState>()((set) => ({
 
   // Weekly needs management
   setWeeklyNeeds: (weeklyNeeds) => {
-    set({ weeklyNeeds });
+    set((state) => {
+      state.weeklyNeeds = weeklyNeeds;
+    });
   },
 
   updateWeeklyNeeds: (day, shiftType, role, count) => {
     set((state) => {
-      const updatedNeeds = { ...state.weeklyNeeds };
-      
-      if (!updatedNeeds[day]) {
-        updatedNeeds[day] = {};
+      if (!state.weeklyNeeds[day]) {
+        state.weeklyNeeds[day] = {};
       }
-      if (!updatedNeeds[day][shiftType]) {
-        updatedNeeds[day][shiftType] = {};
+      if (!state.weeklyNeeds[day][shiftType]) {
+        state.weeklyNeeds[day][shiftType] = {};
       }
       
       if (count <= 0) {
-        delete updatedNeeds[day][shiftType][role];
+        delete state.weeklyNeeds[day][shiftType][role];
         
         // Clean up empty objects
-        if (Object.keys(updatedNeeds[day][shiftType]).length === 0) {
-          delete updatedNeeds[day][shiftType];
+        if (Object.keys(state.weeklyNeeds[day][shiftType]).length === 0) {
+          delete state.weeklyNeeds[day][shiftType];
         }
-        if (Object.keys(updatedNeeds[day]).length === 0) {
-          delete updatedNeeds[day];
+        if (Object.keys(state.weeklyNeeds[day]).length === 0) {
+          delete state.weeklyNeeds[day];
         }
       } else {
-        updatedNeeds[day][shiftType][role] = count;
+        state.weeklyNeeds[day][shiftType][role] = count;
       }
-      
-      return { weeklyNeeds: updatedNeeds };
     });
   },
 
@@ -156,4 +156,5 @@ export const useScheduleStore = create<ScheduleState>()((set) => ({
   resetWeeklyNeeds: () => {
     set({ weeklyNeeds: {} });
   },
-}));
+}))
+);

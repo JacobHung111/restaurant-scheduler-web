@@ -1,8 +1,10 @@
 // src/stores/useStaffStore.ts
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 import type { StaffMember } from '../types';
 import { ALL_ROLES as DEFAULT_ROLES } from '../config';
 import { logger } from '../utils/logger';
+import { generateStaffId } from '../utils/idGenerator';
 
 interface OperationResult {
   success: boolean;
@@ -18,7 +20,7 @@ interface StaffState {
   // Actions
   addStaff: (newStaffData: Omit<StaffMember, 'id'>) => OperationResult;
   deleteStaff: (idToDelete: string) => OperationResult;
-  updateStaff: (id: string, updates: Partial<Omit<StaffMember, 'id'>>) => void;
+  updateStaff: (id: string, updates: Partial<Omit<StaffMember, 'id'>>) => OperationResult;
   reorderStaff: (reorderedList: StaffMember[]) => void;
   setStaffList: (staffList: StaffMember[]) => void;
   
@@ -32,7 +34,8 @@ interface StaffState {
   getStaffPriority: () => string[];
 }
 
-export const useStaffStore = create<StaffState>()((set, get) => ({
+export const useStaffStore = create<StaffState>()(
+  immer((set, get) => ({
   // Initial state
   staffList: [],
   definedRoles: [...DEFAULT_ROLES],
@@ -40,7 +43,7 @@ export const useStaffStore = create<StaffState>()((set, get) => ({
 
   // Staff management actions
   addStaff: (newStaffData) => {
-    const { definedRoles, staffIdCounter } = get();
+    const { definedRoles } = get();
     
     // Validation
     if (!newStaffData.assignedRolesInPriority || newStaffData.assignedRolesInPriority.length === 0) {
@@ -54,13 +57,13 @@ export const useStaffStore = create<StaffState>()((set, get) => ({
       return { success: false, error: `The following selected roles are not valid: ${invalidRoles.join(', ')}` };
     }
 
-    const generatedId = `S${Date.now()}-${staffIdCounter}`;
+    const generatedId = generateStaffId();
     const staffToAdd: StaffMember = { ...newStaffData, id: generatedId };
     
-    set((state) => ({
-      staffList: [...state.staffList, staffToAdd],
-      staffIdCounter: state.staffIdCounter + 1,
-    }));
+    set((state) => {
+      state.staffList.push(staffToAdd);
+      state.staffIdCounter += 1;
+    });
     
     logger.log('Staff added:', staffToAdd);
     return { success: true };
@@ -74,29 +77,47 @@ export const useStaffStore = create<StaffState>()((set, get) => ({
       return { success: false, error: 'Staff member not found.' };
     }
 
-    set((state) => ({
-      staffList: state.staffList.filter((staff) => staff.id !== idToDelete),
-    }));
+    set((state) => {
+      const index = state.staffList.findIndex(staff => staff.id === idToDelete);
+      if (index !== -1) {
+        state.staffList.splice(index, 1);
+      }
+    });
     
     logger.log(`Staff deleted: ${staffToDelete.name} (ID: ${idToDelete})`);
     return { success: true };
   },
 
   updateStaff: (id, updates) => {
-    set((state) => ({
-      staffList: state.staffList.map((staff) =>
-        staff.id === id ? { ...staff, ...updates } : staff
-      ),
-    }));
+    const { staffList } = get();
+    const staffToUpdate = staffList.find(staff => staff.id === id);
+    
+    if (!staffToUpdate) {
+      return { success: false, error: 'Staff member not found.' };
+    }
+
+    set((state) => {
+      const staff = state.staffList.find(s => s.id === id);
+      if (staff) {
+        Object.assign(staff, updates);
+      }
+    });
+    
+    logger.log(`Staff updated: ${staffToUpdate.name} (ID: ${id})`);
+    return { success: true };
   },
 
   reorderStaff: (reorderedList) => {
-    set({ staffList: reorderedList });
+    set((state) => {
+      state.staffList = reorderedList;
+    });
     logger.log('Staff list reordered (priority changed).');
   },
 
   setStaffList: (staffList) => {
-    set({ staffList });
+    set((state) => {
+      state.staffList = staffList;
+    });
   },
 
   // Role management actions
@@ -110,9 +131,9 @@ export const useStaffStore = create<StaffState>()((set, get) => ({
       return { success: false, error: 'Role already exists.' };
     }
     
-    set((state) => ({
-      definedRoles: [...state.definedRoles, roleName],
-    }));
+    set((state) => {
+      state.definedRoles.push(roleName);
+    });
     
     logger.log('Role added:', roleName);
     return { success: true };
@@ -130,16 +151,21 @@ export const useStaffStore = create<StaffState>()((set, get) => ({
       return { success: false, error: `Cannot delete role "${roleName}" because it is assigned to staff members.` };
     }
     
-    set((state) => ({
-      definedRoles: state.definedRoles.filter((role) => role !== roleName),
-    }));
+    set((state) => {
+      const index = state.definedRoles.indexOf(roleName);
+      if (index !== -1) {
+        state.definedRoles.splice(index, 1);
+      }
+    });
     
     logger.log('Role deleted:', roleName);
     return { success: true };
   },
 
   setDefinedRoles: (roles) => {
-    set({ definedRoles: roles });
+    set((state) => {
+      state.definedRoles = roles;
+    });
   },
 
   // Utility functions
@@ -152,4 +178,5 @@ export const useStaffStore = create<StaffState>()((set, get) => ({
     const { staffList } = get();
     return staffList.map((staff) => staff.id);
   },
-}));
+}))
+);
