@@ -15,6 +15,7 @@ export const useStaffSelectors = () => {
       deleteStaff: state.deleteStaff,
       reorderStaff: state.reorderStaff,
       setStaffList: state.setStaffList,
+      setDefinedRoles: state.setDefinedRoles,
       addRole: state.addRole,
       deleteRole: state.deleteRole,
     }))

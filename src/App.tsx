@@ -1,13 +1,11 @@
 // src/App.tsx
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import type { StaffMember, Unavailability, WeeklyNeeds } from "./types";
+import type { StaffMember, Unavailability, WeeklyNeeds, ShiftDefinitions } from "./types";
 import StaffPanel from "./components/StaffPanel";
 import UnavailabilityPanel from "./components/UnavailabilityPanel";
 import NeedsPanel from "./components/NeedsPanel";
 import ScheduleDisplay from "./components/ScheduleDisplay";
-import ShiftDefinitionEditor from "./components/ShiftDefinitionEditor";
-import RoleManager from "./components/RoleManager";
 import MessageModal from "./components/MessageModal";
 import DataOverview from "./components/DataOverview";
 import HistoryPanel from "./components/HistoryPanel";
@@ -78,17 +76,41 @@ function App() {
     }
   };
 
-  const handleImportStaffData = useCallback((data: unknown[]) => {
+  const handleImportStaffData = useCallback((data: unknown) => {
     try {
-      const staffList = data as StaffMember[];
-      staffStore.setStaffList(staffList);
-      scheduleStore.showMessage(
-        'success',
-        'Staff Import Successful',
-        `Successfully imported ${staffList.length} staff members`,
-        staffList.map(staff => `${staff.name} (${staff.assignedRolesInPriority.join(', ')})`)
-      );
-      logger.log("Staff data imported successfully:", data);
+      // Check if data has the new format with definedRoles
+      if (typeof data === 'object' && data !== null && 
+          'staffList' in data && 'definedRoles' in data) {
+        const staffManagementData = data as { staffList: StaffMember[], definedRoles: string[] };
+        
+        // Import both staffList and definedRoles
+        staffStore.setStaffList(staffManagementData.staffList);
+        staffStore.setDefinedRoles(staffManagementData.definedRoles);
+        
+        scheduleStore.showMessage(
+          'success',
+          'Staff Management Import Successful',
+          `Successfully imported ${staffManagementData.staffList.length} staff members and ${staffManagementData.definedRoles.length} roles`,
+          [
+            ...staffManagementData.staffList.map(staff => `${staff.name} (${staff.assignedRolesInPriority.join(', ')})`),
+            `Roles: ${staffManagementData.definedRoles.join(', ')}`
+          ]
+        );
+        logger.log("Staff management data imported successfully:", data);
+      } else if (Array.isArray(data)) {
+        // Legacy format - just staff array
+        const staffList = data as StaffMember[];
+        staffStore.setStaffList(staffList);
+        scheduleStore.showMessage(
+          'success',
+          'Staff Import Successful',
+          `Successfully imported ${staffList.length} staff members`,
+          staffList.map(staff => `${staff.name} (${staff.assignedRolesInPriority.join(', ')})`)
+        );
+        logger.log("Staff data imported successfully:", data);
+      } else {
+        throw new Error('Invalid staff data format');
+      }
     } catch (error) {
       scheduleStore.showMessage(
         'error',
@@ -124,20 +146,48 @@ function App() {
 
   const handleImportNeedsData = useCallback((data: unknown) => {
     try {
-      const weeklyNeeds = data as WeeklyNeeds;
-      scheduleStore.setWeeklyNeeds(weeklyNeeds);
-      const daysCount = Object.keys(weeklyNeeds).length;
-      const details = Object.entries(weeklyNeeds).map(([day, shifts]) => {
-        const shiftsCount = Object.keys(shifts).length;
-        return `${day}: ${shiftsCount} shifts configured`;
-      });
-      scheduleStore.showMessage(
-        'success',
-        'Weekly Needs Import Successful',
-        `Successfully imported weekly needs for ${daysCount} days`,
-        details
-      );
-      logger.log("Weekly needs data imported successfully:", data);
+      // Check if data has the new format with shiftDefinitions
+      if (typeof data === 'object' && data !== null && 
+          'weeklyNeeds' in data && 'shiftDefinitions' in data) {
+        const weeklyNeedsData = data as { weeklyNeeds: WeeklyNeeds, shiftDefinitions: ShiftDefinitions };
+        
+        // Import both weeklyNeeds and shiftDefinitions
+        scheduleStore.setWeeklyNeeds(weeklyNeedsData.weeklyNeeds);
+        scheduleStore.setShiftDefinitions(weeklyNeedsData.shiftDefinitions);
+        
+        const daysCount = Object.keys(weeklyNeedsData.weeklyNeeds).length;
+        const details = Object.entries(weeklyNeedsData.weeklyNeeds).map(([day, shifts]) => {
+          const shiftsCount = Object.keys(shifts).length;
+          return `${day}: ${shiftsCount} shifts configured`;
+        });
+        details.push(`Shift definitions updated: AM (${weeklyNeedsData.shiftDefinitions.HALF_DAY_AM.start}-${weeklyNeedsData.shiftDefinitions.HALF_DAY_AM.end}), PM (${weeklyNeedsData.shiftDefinitions.HALF_DAY_PM.start}-${weeklyNeedsData.shiftDefinitions.HALF_DAY_PM.end})`);
+        
+        scheduleStore.showMessage(
+          'success',
+          'Weekly Needs Import Successful',
+          `Successfully imported weekly needs for ${daysCount} days and shift definitions`,
+          details
+        );
+        logger.log("Weekly needs data with shift definitions imported successfully:", data);
+      } else if (typeof data === 'object' && data !== null) {
+        // Legacy format - just weekly needs object
+        const weeklyNeeds = data as WeeklyNeeds;
+        scheduleStore.setWeeklyNeeds(weeklyNeeds);
+        const daysCount = Object.keys(weeklyNeeds).length;
+        const details = Object.entries(weeklyNeeds).map(([day, shifts]) => {
+          const shiftsCount = Object.keys(shifts).length;
+          return `${day}: ${shiftsCount} shifts configured`;
+        });
+        scheduleStore.showMessage(
+          'success',
+          'Weekly Needs Import Successful',
+          `Successfully imported weekly needs for ${daysCount} days`,
+          details
+        );
+        logger.log("Weekly needs data imported successfully:", data);
+      } else {
+        throw new Error('Invalid weekly needs data format');
+      }
     } catch (error) {
       scheduleStore.showMessage(
         'error',
@@ -210,11 +260,19 @@ function App() {
                             Object.prototype.hasOwnProperty.call(rawData, 'unavailabilityList') || 
                             Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds');
         
+        const isStaffManagementObject = !Array.isArray(rawData) && typeof rawData === 'object' &&
+                                        Object.prototype.hasOwnProperty.call(rawData, 'staffList') && 
+                                        Object.prototype.hasOwnProperty.call(rawData, 'definedRoles');
+        
         const isStaffArray = Array.isArray(rawData) && rawData.length > 0 && 
                             Object.prototype.hasOwnProperty.call(rawData[0], 'id') && Object.prototype.hasOwnProperty.call(rawData[0], 'name');
         
         const isUnavailabilityArray = Array.isArray(rawData) && rawData.length > 0 && 
                                      Object.prototype.hasOwnProperty.call(rawData[0], 'employeeId') && Object.prototype.hasOwnProperty.call(rawData[0], 'dayOfWeek');
+        
+        const isWeeklyNeedsManagementObject = !Array.isArray(rawData) && typeof rawData === 'object' &&
+                                             Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds') && 
+                                             Object.prototype.hasOwnProperty.call(rawData, 'shiftDefinitions');
         
         const isWeeklyNeedsObject = !Array.isArray(rawData) && typeof rawData === 'object' && 
                                    Object.keys(rawData).some(key => 
@@ -245,16 +303,24 @@ function App() {
 
           handleBulkImport(validation.data, 'replace');
           
+        } else if (isStaffManagementObject) {
+          // Staff Management format (with definedRoles)
+          handleImportStaffData(rawData);
+          
         } else if (isStaffArray) {
-          // Individual Staff format
+          // Individual Staff format (legacy)
           handleImportStaffData(rawData);
           
         } else if (isUnavailabilityArray) {
           // Individual Unavailability format
           handleImportUnavailabilityData(rawData);
           
+        } else if (isWeeklyNeedsManagementObject) {
+          // Weekly Needs Management format (with shiftDefinitions)
+          handleImportNeedsData(rawData);
+          
         } else if (isWeeklyNeedsObject) {
-          // Individual Weekly Needs format
+          // Individual Weekly Needs format (legacy)
           handleImportNeedsData(rawData);
           
         } else {
@@ -265,9 +331,11 @@ function App() {
             [
               'Supported formats:',
               '• Bulk data (exported from "Export All Data")',
-              '• Staff array (exported from Staff tab)',
+              '• Staff management data (staff list + roles, exported from Staff tab)',
+              '• Staff array (legacy format)',
               '• Unavailability array (exported from Unavailability tab)',
-              '• Weekly needs object (exported from Needs tab)'
+              '• Weekly needs data (needs + shift definitions, exported from Needs tab)',
+              '• Weekly needs object (legacy format)'
             ]
           );
         }
@@ -502,11 +570,19 @@ function App() {
                             Object.prototype.hasOwnProperty.call(rawData, 'unavailabilityList') || 
                             Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds');
         
+        const isStaffManagementObject = !Array.isArray(rawData) && typeof rawData === 'object' &&
+                                        Object.prototype.hasOwnProperty.call(rawData, 'staffList') && 
+                                        Object.prototype.hasOwnProperty.call(rawData, 'definedRoles');
+        
         const isStaffArray = Array.isArray(rawData) && rawData.length > 0 && 
                             Object.prototype.hasOwnProperty.call(rawData[0], 'id') && Object.prototype.hasOwnProperty.call(rawData[0], 'name');
         
         const isUnavailabilityArray = Array.isArray(rawData) && rawData.length > 0 && 
                                      Object.prototype.hasOwnProperty.call(rawData[0], 'employeeId') && Object.prototype.hasOwnProperty.call(rawData[0], 'dayOfWeek');
+        
+        const isWeeklyNeedsManagementObject = !Array.isArray(rawData) && typeof rawData === 'object' &&
+                                             Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds') && 
+                                             Object.prototype.hasOwnProperty.call(rawData, 'shiftDefinitions');
         
         const isWeeklyNeedsObject = !Array.isArray(rawData) && typeof rawData === 'object' && 
                                    Object.keys(rawData).some(key => 
@@ -536,10 +612,14 @@ function App() {
 
           handleBulkImport(validation.data, 'replace');
           
+        } else if (isStaffManagementObject) {
+          handleImportStaffData(rawData);
         } else if (isStaffArray) {
           handleImportStaffData(rawData);
         } else if (isUnavailabilityArray) {
           handleImportUnavailabilityData(rawData);
+        } else if (isWeeklyNeedsManagementObject) {
+          handleImportNeedsData(rawData);
         } else if (isWeeklyNeedsObject) {
           handleImportNeedsData(rawData);
         } else {
@@ -550,9 +630,11 @@ function App() {
             [
               'Supported formats:',
               '• Bulk data export (containing staffList, unavailabilityList, or weeklyNeeds)',
-              '• Staff array with id and name fields',
+              '• Staff management data (staff list + roles)',
+              '• Staff array with id and name fields (legacy)',
               '• Unavailability array with employeeId and dayOfWeek fields',
-              '• Weekly needs object with day/shift/role structure'
+              '• Weekly needs data (needs + shift definitions)',
+              '• Weekly needs object with day/shift/role structure (legacy)'
             ]
           );
         }
@@ -756,19 +838,16 @@ function App() {
           <TabPanels className="mt-4 sm:mt-6">
             {/* Staff Panel */}
             <TabPanel>
-              <div className="space-y-6">
-                <RoleManager />
-                <StaffPanel
-                  staffList={staffStore.staffList}
-                  definedRoles={staffStore.definedRoles}
-                  onAddStaff={handleAddStaff}
-                  onDeleteStaff={handleDeleteStaff}
-                  onReorderStaff={staffStore.reorderStaff}
-                  onExportSuccess={handleExportSuccess}
-                  onExportError={handleExportError}
-                  onNoDataToExport={handleNoDataToExport}
-                />
-              </div>
+              <StaffPanel
+                staffList={staffStore.staffList}
+                definedRoles={staffStore.definedRoles}
+                onAddStaff={handleAddStaff}
+                onDeleteStaff={handleDeleteStaff}
+                onReorderStaff={staffStore.reorderStaff}
+                onExportSuccess={handleExportSuccess}
+                onExportError={handleExportError}
+                onNoDataToExport={handleNoDataToExport}
+              />
             </TabPanel>
 
             {/* Unavailability Panel */}
@@ -789,7 +868,9 @@ function App() {
               <NeedsPanel
                 definedRoles={staffStore.definedRoles}
                 weeklyNeeds={scheduleStore.weeklyNeeds}
+                shiftDefinitions={scheduleStore.shiftDefinitions}
                 onUpdateNeeds={scheduleStore.updateWeeklyNeeds}
+                onUpdateShiftDefinitions={scheduleStore.setShiftDefinitions}
                 onExportSuccess={handleExportSuccess}
                 onExportError={handleExportError}
                 onNoDataToExport={handleNoDataToExport}
@@ -799,12 +880,6 @@ function App() {
             {/* Schedule Panel */}
             <TabPanel>
               <div className="space-y-6">
-                {/* Shift Configuration */}
-                <ShiftDefinitionEditor
-                  shiftDefinitions={scheduleStore.shiftDefinitions}
-                  onUpdateShiftDefinitions={scheduleStore.setShiftDefinitions}
-                />
-
                 {/* Schedule Preferences */}
                 <div className="rounded-xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-gray-200 dark:border-slate-700">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">

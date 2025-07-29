@@ -38,12 +38,22 @@ export function minutesToTime(minutes: number): string {
 }
 
 // Helper to calculate hours between two HH:MM times
+// Handles midnight crossing for restaurant shifts (e.g., 18:00 to 06:00)
 export const calculateHours = (start: string, end: string): number => {
   const startMin = timeToMinutes(start);
   const endMin = timeToMinutes(end);
   if (startMin < 0 || endMin < 0) return 0;
-  if (endMin <= startMin) return 0;
-  return parseFloat(((endMin - startMin) / 60).toFixed(2));
+  
+  // If same time, return 0 hours
+  if (endMin === startMin) return 0;
+  
+  let actualEndMin = endMin;
+  // Handle midnight crossing: if end time is less than start time, add 24 hours
+  if (endMin < startMin) {
+    actualEndMin = endMin + 1440; // Add 24 hours in minutes (24 * 60 = 1440)
+  }
+  
+  return parseFloat(((actualEndMin - startMin) / 60).toFixed(2));
 };
 
 // Helper to validate HH:MM format

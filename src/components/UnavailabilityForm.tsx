@@ -4,17 +4,12 @@ import { useTranslation } from 'react-i18next';
 import type { StaffMember, Unavailability, ShiftTime } from "../types";
 import { DAYS_OF_WEEK } from "../config";
 import { useScheduleStore } from "../stores/useScheduleStore";
+import { useShallow } from 'zustand/react/shallow';
 
 interface UnavailabilityFormProps {
   staffList: StaffMember[];
   onAddUnavailability: (newUnavData: Unavailability) => void;
 }
-
-const UNAVAILABLE_SHIFT_OPTIONS: ShiftTime[] = [
-  { start: "11:00", end: "16:00" },
-  { start: "16:00", end: "21:00" },
-  { start: "00:00", end: "23:59" },
-];
 function UnavailabilityForm({
   staffList,
   onAddUnavailability,
@@ -23,13 +18,22 @@ function UnavailabilityForm({
   const [selectedStaffId, setSelectedStaffId] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [selectedShifts, setSelectedShifts] = useState<ShiftTime[]>([]);
-  const { showMessage } = useScheduleStore();
+  
+  const { shiftDefinitions, showMessage } = useScheduleStore(
+    useShallow((state) => ({
+      shiftDefinitions: state.shiftDefinitions,
+      showMessage: state.showMessage,
+    }))
+  );
 
-  const getUnavailableShiftLabel = (shiftValue: string): string => {
-    if (shiftValue === "00:00-23:59") {
-      return t('unavailability.allDay');
-    }
-    return shiftValue.replace('-', ' - ');
+  // Generate shift options from current shift definitions - only AM/PM, no full day
+  const getUnavailableShiftOptions = (): ShiftTime[] => [
+    { start: shiftDefinitions.HALF_DAY_AM.start, end: shiftDefinitions.HALF_DAY_AM.end },
+    { start: shiftDefinitions.HALF_DAY_PM.start, end: shiftDefinitions.HALF_DAY_PM.end },
+  ];
+
+  const getUnavailableShiftLabel = (shift: ShiftTime): string => {
+    return `${shift.start} - ${shift.end}`;
   };
 
   const handleShiftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,12 +58,7 @@ function UnavailabilityForm({
       );
       return;
     }
-    const isAllDaySelected = selectedShifts.some(
-      (s) => s.start === "00:00" && s.end === "23:59"
-    );
-    const finalShifts = isAllDaySelected
-      ? [{ start: "00:00", end: "23:59" }]
-      : selectedShifts;
+    const finalShifts = selectedShifts;
     const newUnavData: Unavailability = {
       employeeId: selectedStaffId,
       dayOfWeek: selectedDay,
@@ -137,9 +136,9 @@ function UnavailabilityForm({
             {t('unavailability.selectUnavailableShifts')}
           </label>
           <div className="flex flex-wrap gap-x-4 gap-y-2">
-            {UNAVAILABLE_SHIFT_OPTIONS.map((shiftOpt) => {
+            {getUnavailableShiftOptions().map((shiftOpt) => {
               const shiftValue = `${shiftOpt.start}-${shiftOpt.end}`;
-              const shiftLabel = getUnavailableShiftLabel(shiftValue);
+              const shiftLabel = getUnavailableShiftLabel(shiftOpt);
               return (
                 <div key={shiftValue} className="flex items-center">
                   <input
