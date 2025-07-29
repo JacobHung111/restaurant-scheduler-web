@@ -1,5 +1,6 @@
 // src/components/StaffListItem.tsx
 import type { StaffMember } from "../types";
+import { useTranslation } from 'react-i18next';
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -9,6 +10,7 @@ interface StaffListItemProps {
 }
 
 function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -41,7 +43,7 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
         {...listeners}
         type="button"
         className="p-1 cursor-grab text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-400 mr-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 rounded transition-colors duration-200"
-        aria-label="Drag to reorder"
+        aria-label={t('staff.dragToReorder')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -74,18 +76,18 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
           </span>
         </div>
         <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-          <span className="font-medium">Roles:</span>{" "}
+          <span className="font-medium">{t('staff.roles')}:</span>{" "}
           {staff.assignedRolesInPriority.join(", ")}
           {staff.minHoursPerWeek != null ? (
             <span className="ml-2">
-              <span className="font-medium">Min:</span> {staff.minHoursPerWeek}h
+              <span className="font-medium">{t('staff.min')}:</span> {staff.minHoursPerWeek}h
             </span>
           ) : (
             ""
           )}
           {staff.maxHoursPerWeek != null ? (
             <span className="ml-2">
-              <span className="font-medium">Max:</span> {staff.maxHoursPerWeek}h
+              <span className="font-medium">{t('staff.max')}:</span> {staff.maxHoursPerWeek}h
             </span>
           ) : (
             ""
@@ -97,9 +99,9 @@ function StaffListItem({ staff, onDeleteStaff }: StaffListItemProps) {
       <button
         onClick={() => onDeleteStaff(staff.id)}
         className="ml-auto px-2.5 py-1 text-xs font-medium text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 dark:focus:ring-red-400 flex-shrink-0 transition-all duration-200"
-        aria-label={`Delete ${staff.name}`}
+        aria-label={t('staff.deleteStaffMember', { name: staff.name })}
       >
-        Delete
+        {t('staff.delete')}
       </button>
     </li>
   );

@@ -1,5 +1,6 @@
 // src/components/ShiftDefinitionEditor.tsx
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import type { ShiftDefinitions } from "../types";
 import { timeToMinutes } from "../utils";
 
@@ -24,6 +25,8 @@ function ShiftDefinitionEditor({
   shiftDefinitions,
   onUpdateShiftDefinitions,
 }: ShiftDefinitionEditorProps) {
+  const { t } = useTranslation();
+
   // Local state to manage input values
   const [amStart, setAmStart] = useState(shiftDefinitions.HALF_DAY_AM.start);
   const [amEnd, setAmEnd] = useState(shiftDefinitions.HALF_DAY_AM.end);
@@ -41,15 +44,13 @@ function ShiftDefinitionEditor({
       !isValidTimeFormat(pmStart) ||
       !isValidTimeFormat(pmEnd)
     ) {
-      setValidationError(
-        "Invalid time format. Please use HH:MM (e.g., 11:00)."
-      );
+      setValidationError(t("shiftDefinition.invalidTimeFormat"));
       return;
     }
 
     // Consistency Validation
     if (amEnd !== pmStart) {
-      setValidationError("AM shift end time must equal PM shift start time.");
+      setValidationError(t("shiftDefinition.amEndMustEqualPmStart"));
     } else {
       setValidationError(null);
     }
@@ -76,17 +77,20 @@ function ShiftDefinitionEditor({
   return (
     <div className="p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 mb-6">
       <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-slate-100">
-        Define Shift Times
+        {t("shiftDefinition.defineShiftTimes")}
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
         {/* AM Shift */}
         <fieldset className="border p-4 rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50/30 dark:bg-slate-700/30">
           <legend className="text-sm font-medium text-blue-600 dark:text-blue-400 px-2">
-            AM Shift (e.g., Morning)
+            {t("shiftDefinition.amShift")}
           </legend>
           <div className="flex items-center space-x-2">
-            <label htmlFor="am-start" className="text-sm w-12 text-right text-gray-700 dark:text-slate-300">
-              Start:
+            <label
+              htmlFor="am-start"
+              className="text-sm w-12 text-right text-gray-700 dark:text-slate-300"
+            >
+              {t("shiftDefinition.start")}
             </label>
             <input
               type="time"
@@ -98,8 +102,11 @@ function ShiftDefinitionEditor({
             />
           </div>
           <div className="flex items-center space-x-2 mt-2">
-            <label htmlFor="am-end" className="text-sm w-12 text-right text-gray-700 dark:text-slate-300">
-              End:
+            <label
+              htmlFor="am-end"
+              className="text-sm w-12 text-right text-gray-700 dark:text-slate-300"
+            >
+              {t("shiftDefinition.end")}
             </label>
             <input
               type="time"
@@ -111,18 +118,22 @@ function ShiftDefinitionEditor({
             />
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-2">
-            Hours: {calculateHours(amStart, amEnd).toFixed(1)}
+            {t("shiftDefinition.hours")}{" "}
+            {calculateHours(amStart, amEnd).toFixed(1)}
           </p>
         </fieldset>
 
         {/* PM Shift */}
         <fieldset className="border p-4 rounded-lg border-gray-300 dark:border-slate-600 bg-gray-50/30 dark:bg-slate-700/30">
           <legend className="text-sm font-medium text-blue-600 dark:text-blue-400 px-2">
-            PM Shift (e.g., Evening)
+            {t("shiftDefinition.pmShift")}
           </legend>
           <div className="flex items-center space-x-2">
-            <label htmlFor="pm-start" className="text-sm w-12 text-right text-gray-700 dark:text-slate-300">
-              Start:
+            <label
+              htmlFor="pm-start"
+              className="text-sm w-12 text-right text-gray-700 dark:text-slate-300"
+            >
+              {t("shiftDefinition.start")}
             </label>
             <input
               type="time"
@@ -140,8 +151,11 @@ function ShiftDefinitionEditor({
             />
           </div>
           <div className="flex items-center space-x-2 mt-2">
-            <label htmlFor="pm-end" className="text-sm w-12 text-right text-gray-700 dark:text-slate-300">
-              End:
+            <label
+              htmlFor="pm-end"
+              className="text-sm w-12 text-right text-gray-700 dark:text-slate-300"
+            >
+              {t("shiftDefinition.end")}
             </label>
             <input
               type="time"
@@ -153,14 +167,16 @@ function ShiftDefinitionEditor({
             />
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-2">
-            Hours: {calculateHours(pmStart, pmEnd).toFixed(1)}
+            {t("shiftDefinition.hours")}{" "}
+            {calculateHours(pmStart, pmEnd).toFixed(1)}
           </p>
         </fieldset>
 
         {/* Full Day Info */}
         <div className="md:col-span-2 mt-4 text-sm text-center text-gray-700 dark:text-slate-300 bg-blue-50 dark:bg-slate-700/50 p-3 rounded-lg border border-blue-200 dark:border-slate-600">
-          <strong>Full Day Shift:</strong> {amStart} - {pmEnd} (
-          {calculateHours(amStart, pmEnd).toFixed(1)} hours)
+          <strong>{t("shiftDefinition.fullDayShift")}</strong> {amStart} -{" "}
+          {pmEnd} ({t("shiftDefinition.hours").toLowerCase()}
+          {calculateHours(amStart, pmEnd).toFixed(1)})
         </div>
 
         {/* Validation Error Display */}

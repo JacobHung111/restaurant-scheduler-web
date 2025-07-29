@@ -1,5 +1,6 @@
 // src/components/ScheduleDisplay.tsx
 import type { Schedule, StaffMember, ShiftDefinitions } from "../types";
+import { useTranslation } from 'react-i18next';
 import { DAYS_OF_WEEK, ShiftType } from "../config";
 
 interface ScheduleDisplayProps {
@@ -16,6 +17,7 @@ function ScheduleDisplay({
   staffList,
   shiftDefinitions,
 }: ScheduleDisplayProps) {
+  const { t } = useTranslation();
   const sortedStaff = [...staffList].sort((a, b) =>
     a.name.localeCompare(b.name)
   );
@@ -23,8 +25,8 @@ function ScheduleDisplay({
   if (!schedule || Object.keys(schedule).length === 0) {
     const message =
       schedule === null
-        ? "No schedule generated yet or an error occurred."
-        : "Schedule generated, but no shifts were assigned.";
+        ? t('schedule.noScheduleGenerated')
+        : t('schedule.noShiftsAssigned');
     return <p className="text-center text-gray-500 dark:text-slate-400 italic mt-6">{message}</p>;
   }
 
@@ -39,7 +41,7 @@ function ScheduleDisplay({
       {/* Warnings Display */}
       {warnings && warnings.length > 0 && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
-          <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">Warnings:</h3>
+          <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">{t('schedule.warnings')}</h3>
           <ul className="text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside space-y-1">
             {warnings.map((warning, index) => (
               <li key={index}>{warning}</li>
@@ -56,7 +58,7 @@ function ScheduleDisplay({
               scope="col"
               className="px-3 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider border-r border-gray-300 dark:border-slate-600 sticky left-0 bg-gray-100 dark:bg-slate-800 z-10"
             >
-              Staff / Day
+              {t('schedule.staffDay')}
             </th>
             {DAYS_OF_WEEK.map((day) => (
               <th
@@ -64,7 +66,7 @@ function ScheduleDisplay({
                 scope="col"
                 className="px-3 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap border-l border-gray-200 dark:border-slate-600"
               >
-                {day}
+                {t(`days.${day.toLowerCase()}`)}
               </th>
             ))}
           </tr>

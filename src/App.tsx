@@ -19,7 +19,9 @@ import {
 } from "./hooks/useStoreSelectors";
 import { validateBulkImportData, validateDataRelationships, type BulkImportData } from "./utils/importValidation";
 import { logger } from "./utils/logger";
+import "./i18n/config"; // Initialize i18n
 import "./index.css";
+import { useTranslation } from 'react-i18next';
 
 // Helper for conditional class names
 function classNames(...classes: (string | boolean | undefined)[]) {
@@ -27,6 +29,8 @@ function classNames(...classes: (string | boolean | undefined)[]) {
 }
 
 function App() {
+  const { t } = useTranslation();
+  
   // --- File Input Ref for Universal Import ---
   const universalImportFileRef = useRef<HTMLInputElement>(null);
 
@@ -674,10 +678,10 @@ function App() {
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100 mb-2">
-                Release to Upload
+                {t('dragDrop.releaseToUpload')}
               </h2>
               <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
-                Drop your JSON file to import data
+                {t('dragDrop.dropJsonFile')}
               </p>
               <div className="inline-flex items-center px-3 py-1 bg-blue-50 dark:bg-slate-700/50 border border-blue-200 dark:border-slate-600 rounded-lg">
                 <svg
@@ -693,7 +697,7 @@ function App() {
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">JSON files only</span>
+                <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">{t('dragDrop.jsonFilesOnly')}</span>
               </div>
             </div>
           </div>
@@ -704,10 +708,10 @@ function App() {
         {/* Header */}
         <div className="mb-6 sm:mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-slate-100">
-            Restaurant Scheduler
+            {t('app.title')}
           </h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-slate-400 px-2">
-            Manage staff, define needs, and generate weekly work schedules
+            {t('app.subtitle')}
           </p>
           
           {/* Data Overview with Actions */}
@@ -726,9 +730,14 @@ function App() {
         {/* Main Tab Interface */}
         <TabGroup>
           <TabList className="grid grid-cols-2 sm:flex sm:space-x-1 gap-1 sm:gap-0 rounded-xl bg-blue-100 dark:bg-slate-800 p-1">
-            {["Staff", "Unavailability", "Needs", "Schedule"].map((tab) => (
+            {[
+              { key: "staff", label: t('navigation.staff') },
+              { key: "unavailability", label: t('navigation.unavailability') },
+              { key: "needs", label: t('navigation.needs') },
+              { key: "schedule", label: t('navigation.schedule') }
+            ].map((tab) => (
               <Tab
-                key={tab}
+                key={tab.key}
                 className={({ selected }) =>
                   classNames(
                     "w-full rounded-lg py-2 sm:py-2.5 text-xs sm:text-sm font-medium leading-5 transition-all duration-200",
@@ -739,7 +748,7 @@ function App() {
                   )
                 }
               >
-                {tab}
+                {tab.label}
               </Tab>
             ))}
           </TabList>
@@ -799,13 +808,13 @@ function App() {
                 {/* Schedule Preferences */}
                 <div className="rounded-xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-gray-200 dark:border-slate-700">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">
-                    Schedule Preferences
+                    {t('schedule.schedulePreferences')}
                   </h3>
                   <div className="space-y-3">
                     {[
-                      { value: "PRIORITIZE_FULL_DAYS", label: "Prioritize Full Days" },
-                      { value: "PRIORITIZE_HALF_DAYS", label: "Prioritize Half Days" },
-                      { value: "NONE", label: "No Preference" },
+                      { value: "PRIORITIZE_FULL_DAYS", label: t('schedule.prioritizeFullDays') },
+                      { value: "PRIORITIZE_HALF_DAYS", label: t('schedule.prioritizeHalfDays') },
+                      { value: "NONE", label: t('schedule.noPreference') },
                     ].map((option) => (
                       <label key={option.value} className="flex items-center cursor-pointer">
                         <input
@@ -833,7 +842,7 @@ function App() {
                     disabled={scheduleStore.isLoading}
                     className="rounded-lg bg-blue-600 dark:bg-blue-500 px-8 py-3 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-200 shadow-sm"
                   >
-                    {scheduleStore.isLoading ? "Generating..." : "Generate Weekly Schedule"}
+                    {scheduleStore.isLoading ? t('schedule.generating') : t('schedule.generateSchedule')}
                   </button>
                 </div>
 

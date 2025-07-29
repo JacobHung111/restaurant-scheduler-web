@@ -6,10 +6,12 @@ A production-ready React 19 restaurant staff scheduling application that intelli
 
 - **Smart Staff Management** - Role assignments with drag-and-drop priority ordering
 - **Intelligent Scheduling** - AI-powered schedule generation with conflict resolution
+- **Complete Internationalization** - Full i18next integration with 4 languages (English, French, Traditional Chinese, Simplified Chinese)
 - **Universal Data Import** - Auto-detects and handles multiple JSON formats
 - **History Management** - Save and restore complete application states (max 3 records)
 - **Complete Dark Mode** - Full light/dark/system theme support with persistent storage
 - **Real-time Validation** - Immediate feedback with comprehensive error handling
+- **Mobile-First Design** - Responsive design optimized for all screen sizes
 - **Accessibility First** - Full keyboard navigation and screen reader support
 - **Production Ready** - Enterprise-level code quality with comprehensive testing
 
@@ -34,6 +36,14 @@ Tailwind CSS 3.4.17 - Utility-first styling with dark mode support
 @dnd-kit 6.3.1 - Accessible drag-and-drop functionality
 Heroicons 2.2.0 - Professional icon system
 Complete Dark Mode - Light/Dark/System theme with persistent storage
+```
+
+### Internationalization & Localization
+```
+react-i18next 15.1.8 - React integration for i18next
+i18next 24.3.1 - Core internationalization framework
+4 Languages: English (default), French, Traditional Chinese, Simplified Chinese
+Persistent Language Selection - User preference saved to localStorage
 ```
 
 ### Development & Quality
@@ -75,13 +85,14 @@ npm run preview  # Preview production build locally
 ## 📋 User Guide
 
 ### Basic Workflow
-1. **Choose Theme** - Select Light, Dark, or System theme (top-right toggle)
-2. **Define Roles** - Create job positions (Server, Cashier, etc.)
-3. **Add Staff** - Assign roles and set priority via drag-and-drop
-4. **Set Availability** - Define when staff are unavailable
-5. **Configure Needs** - Specify required staff per day/shift/role
-6. **Generate Schedule** - AI creates optimized weekly assignments
-7. **Save History** - Save complete state for future reference (max 3 records)
+1. **Choose Language** - Select from 4 available languages (language selector dropdown)
+2. **Choose Theme** - Select Light, Dark, or System theme (theme toggle button)
+3. **Define Roles** - Create job positions (Server, Cashier, etc.)
+4. **Add Staff** - Assign roles and set priority via drag-and-drop
+5. **Set Availability** - Define when staff are unavailable
+6. **Configure Needs** - Specify required staff per day/shift/role
+7. **Generate Schedule** - AI creates optimized weekly assignments
+8. **Save History** - Save complete state for future reference (max 3 records)
 
 ### Data Management
 - **Universal Import** - Automatically detects JSON format types
@@ -132,16 +143,24 @@ src/
 │   ├── useStaffStore.ts        # Staff and roles with validation
 │   ├── useUnavailabilityStore.ts # Availability with conflict detection  
 │   ├── useScheduleStore.ts     # Schedule generation and MessageModal
-│   ├── useSettingsStore.ts     # Theme management with localStorage
+│   ├── useSettingsStore.ts     # Theme + language management with localStorage
 │   └── useHistoryStore.ts      # History records with localStorage
 ├── components/          # React components with TypeScript
-│   ├── MessageModal.tsx        # Unified user feedback system (dark mode)
-│   ├── ThemeToggle.tsx         # Light/Dark/System theme switcher
-│   ├── HistoryPanel.tsx        # History management (mobile + dark mode)
-│   ├── ConfirmDialog.tsx       # Confirmation dialogs (dark mode)
-│   ├── ErrorBoundary.tsx       # Runtime error recovery (dark mode)
-│   ├── StaffForm.tsx           # Staff creation with validation (dark mode)
-│   └── [other components]      # Feature-specific UI components (all dark mode)
+│   ├── MessageModal.tsx        # Unified user feedback system (i18n + dark mode)
+│   ├── ThemeToggle.tsx         # Light/Dark/System theme switcher (i18n)
+│   ├── LanguageSelector.tsx    # Language selection dropdown (4 languages)
+│   ├── HistoryPanel.tsx        # History management (i18n + mobile + dark mode)
+│   ├── ConfirmDialog.tsx       # Confirmation dialogs (i18n + dark mode)
+│   ├── ErrorBoundary.tsx       # Runtime error recovery (i18n + dark mode)
+│   ├── StaffForm.tsx           # Staff creation with validation (i18n + dark mode)
+│   └── [other components]      # Feature-specific UI components (all i18n + dark mode)
+├── i18n/                # Internationalization configuration
+│   ├── index.ts                # i18next configuration and setup
+│   └── locales/                # Translation files for all languages
+│       ├── en.json             # English translations
+│       ├── fr.json             # French translations
+│       ├── zh-TW.json          # Traditional Chinese translations
+│       └── zh-CN.json          # Simplified Chinese translations
 ├── hooks/               # Custom hooks for store selectors
 ├── utils/               # Utilities and validation
 │   ├── logger.ts              # Environment-aware logging system
@@ -314,5 +333,83 @@ if (loadResult.success) {
 - **Automatic Cleanup** - Intelligent storage limit management
 - **Data Validation** - Comprehensive validation of saved/loaded data
 - **Error Recovery** - Graceful handling of corrupted or invalid data
+
+## 🌍 Internationalization Features
+
+### Complete Multi-Language Support
+- **4 Languages Supported**: English (default), French, Traditional Chinese, Simplified Chinese
+- **Full Application Coverage**: All UI components, labels, messages, and validation text
+- **Real-time Language Switching**: Instant language change without page reload
+- **Persistent Selection**: Language preference saved to localStorage
+
+### Language Selector
+```typescript
+// Language selector component with flag icons
+const { language, changeLanguage } = useTranslation();
+
+// Available languages with native names
+const languages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' },
+  { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' }
+];
+```
+
+### Translation System
+- **Structured JSON Files**: Organized by feature domains (staff, schedule, validation, etc.)
+- **Nested Key Support**: Hierarchical organization for maintainability
+- **Interpolation**: Dynamic content with variable substitution
+- **Pluralization**: Proper plural forms for different languages
+
+### Implementation Details
+```typescript
+// Component localization pattern
+import { useTranslation } from 'react-i18next';
+
+const Component = () => {
+  const { t } = useTranslation();
+  
+  return (
+    <div>
+      <h1>{t('staff.management')}</h1>
+      <p>{t('staff.description', { count: staffList.length })}</p>
+    </div>
+  );
+};
+
+// Settings store with language management
+const useSettingsStore = create((set) => ({
+  language: 'en',
+  setLanguage: (lang) => {
+    set({ language: lang });
+    i18n.changeLanguage(lang);
+    localStorage.setItem('restaurant-scheduler-language', lang);
+  }
+}));
+```
+
+### Translation Coverage
+```yaml
+Core Features:
+  - Staff Management: ✅ Complete
+  - Availability: ✅ Complete  
+  - Schedule Generation: ✅ Complete
+  - Weekly Needs: ✅ Complete
+  - History Management: ✅ Complete
+  
+UI Components:
+  - Forms & Validation: ✅ Complete
+  - Navigation & Menus: ✅ Complete
+  - Dialogs & Modals: ✅ Complete
+  - Error Messages: ✅ Complete
+  - Success Feedback: ✅ Complete
+  
+System Messages:
+  - Import/Export: ✅ Complete
+  - Data Validation: ✅ Complete
+  - API Responses: ✅ Complete
+  - Loading States: ✅ Complete
+```
 
 Built with modern React development best practices and enterprise-level quality standards.

@@ -1,5 +1,6 @@
 // src/components/UnavailabilityForm.tsx
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import type { StaffMember, Unavailability, ShiftTime } from "../types";
 import { DAYS_OF_WEEK } from "../config";
 import { useScheduleStore } from "../stores/useScheduleStore";
@@ -14,20 +15,22 @@ const UNAVAILABLE_SHIFT_OPTIONS: ShiftTime[] = [
   { start: "16:00", end: "21:00" },
   { start: "00:00", end: "23:59" },
 ];
-const UNAVAILABLE_SHIFT_LABELS: { [key: string]: string } = {
-  "11:00-16:00": "11:00 - 16:00",
-  "16:00-21:00": "16:00 - 21:00",
-  "00:00-23:59": "All Day",
-};
-
 function UnavailabilityForm({
   staffList,
   onAddUnavailability,
 }: UnavailabilityFormProps) {
+  const { t } = useTranslation();
   const [selectedStaffId, setSelectedStaffId] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [selectedShifts, setSelectedShifts] = useState<ShiftTime[]>([]);
   const { showMessage } = useScheduleStore();
+
+  const getUnavailableShiftLabel = (shiftValue: string): string => {
+    if (shiftValue === "00:00-23:59") {
+      return t('unavailability.allDay');
+    }
+    return shiftValue.replace('-', ' - ');
+  };
 
   const handleShiftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
@@ -46,8 +49,8 @@ function UnavailabilityForm({
     if (!selectedStaffId || !selectedDay || selectedShifts.length === 0) {
       showMessage(
         'warning',
-        'Incomplete Unavailability Information',
-        'Please select staff, day, and at least one unavailable shift.'
+        t('unavailability.incompleteInformation'),
+        t('unavailability.pleaseSelectAll')
       );
       return;
     }
@@ -82,7 +85,7 @@ function UnavailabilityForm({
             htmlFor="unav-staff-select-form"
             className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
           >
-            Select Staff:
+            {t('unavailability.selectStaff')}
           </label>
           <select
             id="unav-staff-select-form"
@@ -92,7 +95,7 @@ function UnavailabilityForm({
             className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-indigo-500 dark:focus:border-blue-400 focus:ring-indigo-500 dark:focus:ring-blue-400 sm:text-sm bg-white"
           >
             <option value="" disabled>
-              -- Select Staff --
+              {t('unavailability.selectStaffOption')}
             </option>
             {staffList.map((staff) => (
               <option key={staff.id} value={staff.id}>
@@ -108,7 +111,7 @@ function UnavailabilityForm({
             htmlFor="unav-day-select-form"
             className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
           >
-            Select Day:
+            {t('unavailability.selectDay')}
           </label>
           <select
             id="unav-day-select-form"
@@ -118,11 +121,11 @@ function UnavailabilityForm({
             className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 shadow-sm focus:border-indigo-500 dark:focus:border-blue-400 focus:ring-indigo-500 dark:focus:ring-blue-400 sm:text-sm bg-white"
           >
             <option value="" disabled>
-              -- Select Day --
+              {t('unavailability.selectDayOption')}
             </option>
             {DAYS_OF_WEEK.map((day) => (
               <option key={day} value={day}>
-                {day}
+                {t(`days.${day.toLowerCase()}`)}
               </option>
             ))}
           </select>
@@ -131,13 +134,12 @@ function UnavailabilityForm({
         {/* Shift Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-            Select Unavailable Shifts:
+            {t('unavailability.selectUnavailableShifts')}
           </label>
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             {UNAVAILABLE_SHIFT_OPTIONS.map((shiftOpt) => {
               const shiftValue = `${shiftOpt.start}-${shiftOpt.end}`;
-              const shiftLabel =
-                UNAVAILABLE_SHIFT_LABELS[shiftValue] || shiftValue;
+              const shiftLabel = getUnavailableShiftLabel(shiftValue);
               return (
                 <div key={shiftValue} className="flex items-center">
                   <input
@@ -170,7 +172,7 @@ function UnavailabilityForm({
             type="submit"
             className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 dark:bg-blue-600 hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-400 transition duration-150 ease-in-out"
           >
-            Add Unavailability
+            {t('unavailability.addUnavailability')}
           </button>
         </div>
       </form>

@@ -3,6 +3,7 @@ import type { StaffMember } from "../types";
 import StaffForm from "./StaffForm";
 import StaffList from "./StaffList";
 import ImportExportButtons from "./ImportExportButtons";
+import { useTranslation } from 'react-i18next';
 
 interface StaffPanelProps {
   staffList: StaffMember[];
@@ -25,17 +26,19 @@ function StaffPanel({
   onExportError,
   onNoDataToExport,
 }: StaffPanelProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
       <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-slate-100">
-        Staff Management
+        {t('staff.management')}
       </h2>
       <ImportExportButtons
-        dataType="Staff"
+        dataType={t('staff.management')}
         dataToExport={staffList}
         onExportSuccess={onExportSuccess}
         onExportError={onExportError}
-        onNoDataToExport={() => onNoDataToExport?.('Staff')}
+        onNoDataToExport={() => onNoDataToExport?.(t('staff.management'))}
         importDisabled={true}
       />
       <StaffForm definedRoles={definedRoles} onAddStaff={onAddStaff} />

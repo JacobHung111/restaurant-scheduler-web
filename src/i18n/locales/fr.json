@@ -1,0 +1,229 @@
+{
+  "app": {
+    "title": "Planificateur de Restaurant",
+    "subtitle": "Gérez le personnel, définissez les besoins et générez des horaires de travail hebdomadaires"
+  },
+  
+  "navigation": {
+    "staff": "Personnel",
+    "unavailability": "Indisponibilité", 
+    "needs": "Besoins",
+    "schedule": "Horaire"
+  },
+  
+  "dataOverview": {
+    "title": "Vue d'ensemble des données",
+    "staff": "Personnel",
+    "unavailable": "Indisponible",
+    "needs": "Besoins",
+    "days": "jours",
+    "items": "éléments",
+    "actions": "Actions",
+    "history": "Historique",
+    "exportAllData": "Exporter toutes les données",
+    "downloadJson": "Télécharger JSON",
+    "importData": "Importer des données",
+    "bulkOrIndividual": "Fichiers JSON en lot ou individuels"
+  },
+  
+  "staff": {
+    "management": "Gestion du personnel",
+    "addNewStaff": "Ajouter un nouveau membre du personnel",
+    "addStaff": "Ajouter du personnel",
+    "staffName": "Nom du personnel :",
+    "staffList": "Liste du personnel ({{count}})",
+    "dragHandleInstructions": "(Glissez la poignée pour réorganiser la priorité)",
+    "noStaffAdded": "Aucun personnel ajouté. Utilisez le formulaire ci-dessus.",
+    "name": "Nom",
+    "roles": "Rôles",
+    "availableRoles": "Rôles disponibles :",
+    "assignedRoles": "Rôles assignés et priorisés :",
+    "addRoleButton": "Ajouter »",
+    "allRolesAssigned": "Tous les rôles définis sont assignés.",
+    "dragToReorderInstructions": "Ajoutez des rôles depuis la gauche. Glissez pour réorganiser (le haut est la priorité la plus élevée).",
+    "minWeeklyHours": "Heures hebdomadaires minimum (Optionnel) :",
+    "maxWeeklyHours": "Heures hebdomadaires maximum (Optionnel) :",
+    "dragToReorderRole": "Glisser pour réorganiser le rôle",
+    "removeRole": "Supprimer le rôle {{role}}",
+    "priority": "Priorité",
+    "delete": "Supprimer",
+    "export": "Exporter",
+    "import": "Importer",
+    "dragToReorder": "Glisser pour réorganiser",
+    "deleteStaffMember": "Supprimer {{name}}",
+    "min": "Min",
+    "max": "Max"
+  },
+
+  "roles": {
+    "manageRoles": "Gérer les rôles",
+    "currentRoles": "Rôles actuels :",
+    "noRolesDefined": "Aucun rôle défini.",
+    "enterNewRoleName": "Saisir le nom du nouveau rôle",
+    "deleteRole": "Supprimer le rôle {{role}}",
+    "add": "Ajouter"
+  },
+
+  "shiftDefinition": {
+    "defineShiftTimes": "Définir les horaires d'équipe",
+    "amShift": "Équipe du matin (ex: Matin)",
+    "pmShift": "Équipe du soir (ex: Soir)",
+    "start": "Début :",
+    "end": "Fin :",
+    "hours": "Heures :",
+    "fullDayShift": "Équipe de jour complète :",
+    "invalidTimeFormat": "Format d'heure invalide. Veuillez utiliser HH:MM (ex: 11:00).",
+    "amEndMustEqualPmStart": "L'heure de fin de l'équipe du matin doit être égale à l'heure de début de l'équipe du soir."
+  },
+  
+  "unavailability": {
+    "management": "Gestion des indisponibilités",
+    "staffUnavailability": "Indisponibilité du personnel",
+    "employee": "Employé",
+    "day": "Jour",
+    "shift": "Équipe",
+    "add": "Ajouter",
+    "delete": "Supprimer",
+    "selectStaff": "Sélectionner le personnel :",
+    "selectStaffOption": "-- Sélectionner le personnel --",
+    "selectDay": "Sélectionner le jour :",
+    "selectDayOption": "-- Sélectionner le jour --",
+    "selectUnavailableShifts": "Sélectionner les équipes indisponibles :",
+    "addUnavailability": "Ajouter l'indisponibilité",
+    "allDay": "Toute la journée",
+    "incompleteInformation": "Informations d'indisponibilité incomplètes",
+    "pleaseSelectAll": "Veuillez sélectionner le personnel, le jour et au moins une équipe indisponible.",
+    "unavailabilityList": "Liste d'indisponibilité ({{count}}) :",
+    "noUnavailabilityAdded": "Aucune indisponibilité ajoutée.",
+    "unavailable": "Indisponible",
+    "unknown": "Inconnu (ID : {{id}})",
+    "deleteUnavailability": "Supprimer l'indisponibilité pour {{name}} le {{day}}"
+  },
+  
+  "needs": {
+    "weeklyNeeds": "Besoins hebdomadaires",
+    "defineNeeds": "Définir les besoins en personnel pour chaque jour et équipe"
+  },
+  
+  "schedule": {
+    "shiftConfiguration": "Configuration des équipes",
+    "schedulePreferences": "Préférences d'horaire",
+    "prioritizeFullDays": "Prioriser les journées complètes",
+    "prioritizeHalfDays": "Prioriser les demi-journées", 
+    "noPreference": "Aucune préférence",
+    "generateSchedule": "Générer l'horaire hebdomadaire",
+    "generating": "Génération en cours...",
+    "scheduleDisplay": "Affichage de l'horaire",
+    "warnings": "Avertissements :",
+    "staffDay": "Personnel / Jour",
+    "noScheduleGenerated": "Aucun horaire généré ou une erreur s'est produite.",
+    "noShiftsAssigned": "Horaire généré, mais aucune équipe n'a été assignée."
+  },
+  
+  "days": {
+    "monday": "Lundi",
+    "tuesday": "Mardi", 
+    "wednesday": "Mercredi",
+    "thursday": "Jeudi",
+    "friday": "Vendredi",
+    "saturday": "Samedi",
+    "sunday": "Dimanche"
+  },
+  
+  "shifts": {
+    "morning": "Matin",
+    "afternoon": "Après-midi",
+    "evening": "Soir",
+    "night": "Nuit",
+    "HALF_DAY_AM": "Équipe du matin",
+    "HALF_DAY_PM": "Équipe du soir"
+  },
+  
+  "importExport": {
+    "import": "Importer {{dataType}} (.json)",
+    "export": "Exporter {{dataType}} (.json)"
+  },
+  
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "add": "Ajouter",
+    "export": "Exporter",
+    "import": "Importer",
+    "loading": "Chargement...",
+    "success": "Succès",
+    "error": "Erreur",
+    "warning": "Avertissement",
+    "confirm": "Confirmer"
+  },
+  
+  "messages": {
+    "exportSuccess": "Exportation réussie",
+    "importSuccess": "Importation réussie", 
+    "exportFailed": "Échec de l'exportation",
+    "importFailed": "Échec de l'importation",
+    "noDataToExport": "Aucune donnée disponible à exporter",
+    "invalidFileType": "Type de fichier invalide",
+    "fileReadError": "Erreur de lecture du fichier"
+  },
+  
+  "dragDrop": {
+    "releaseToUpload": "Relâcher pour télécharger",
+    "dropJsonFile": "Déposez votre fichier JSON pour importer les données",
+    "jsonFilesOnly": "Fichiers JSON uniquement"
+  },
+
+  "history": {
+    "title": "Historique",
+    "saveCurrentState": "Sauvegarder l'état actuel",
+    "generateScheduleFirst": "Générez d'abord un horaire pour sauvegarder",
+    "storageLimitReached": "Limite de stockage atteinte",
+    "deleteOldRecordsMessage": "Supprimez les anciens enregistrements pour en sauvegarder de nouveaux (max 3 enregistrements)",
+    "noHistoryRecords": "Aucun enregistrement d'historique",
+    "generateAndSaveMessage": "Générez et sauvegardez des horaires pour créer un historique",
+    "staff": "personnel",
+    "constraints": "contraintes",
+    "enterRecordName": "Saisir le nom de l'enregistrement",
+    "saveChanges": "Sauvegarder les modifications",
+    "cancelEditing": "Annuler l'édition",
+    "editRecord": "Modifier {{name}}",
+    "deleteRecord": "Supprimer {{name}}",
+    "clickToLoadOrDelete": "Cliquez sur un enregistrement pour le charger, ou supprimez pour libérer de l'espace",
+    "deleteHistoryRecord": "Supprimer l'enregistrement d'historique",
+    "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ? Cette action ne peut pas être annulée.",
+    "deleteCta": "Supprimer",
+    "cancel": "Annuler",
+    "saveFailed": "Échec de la sauvegarde",
+    "noScheduleAvailable": "Aucun horaire disponible à sauvegarder.",
+    "recordSaved": "Enregistrement sauvegardé",
+    "recordSavedSuccess": "L'enregistrement d'historique a été sauvegardé avec succès.",
+    "recordDeleted": "Enregistrement supprimé",
+    "recordDeletedSuccess": "\"{{name}}\" a été supprimé.",
+    "deleteFailed": "Échec de la suppression",
+    "deleteFailedMessage": "Échec de la suppression de l'enregistrement.",
+    "recordLoaded": "Enregistrement chargé",
+    "recordLoadedSuccess": "\"{{name}}\" a été chargé avec succès.",
+    "loadFailed": "Échec du chargement",
+    "loadFailedMessage": "Échec du chargement de l'enregistrement.",
+    "recordRenamed": "Enregistrement renommé",
+    "recordRenamedSuccess": "L'enregistrement d'historique a été renommé avec succès."
+  },
+
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système",
+    "themeLabel": "Thème: {{theme}} (cliquez pour changer)"
+  },
+  
+  "language": {
+    "english": "Anglais",
+    "french": "Français", 
+    "traditionalChinese": "Chinois traditionnel",
+    "simplifiedChinese": "Chinois simplifié",
+    "selectLanguage": "Sélectionner la langue"
+  }
+}

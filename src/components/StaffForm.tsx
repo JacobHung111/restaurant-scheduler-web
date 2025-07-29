@@ -10,6 +10,7 @@ import {
   useSensors,
   DragEndEvent,
 } from "@dnd-kit/core";
+import { useTranslation } from 'react-i18next';
 import {
   arrayMove,
   SortableContext,
@@ -30,6 +31,7 @@ interface SortableRoleItemProps {
 }
 
 function SortableRoleItem({ role, onRemove }: SortableRoleItemProps) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -59,7 +61,7 @@ function SortableRoleItem({ role, onRemove }: SortableRoleItemProps) {
         type="button"
         {...listeners}
         className="p-0.5 cursor-grab text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-400 mr-2"
-        aria-label="Drag to reorder role"
+        aria-label={t('staff.dragToReorderRole')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -88,7 +90,7 @@ function SortableRoleItem({ role, onRemove }: SortableRoleItemProps) {
         type="button"
         onClick={() => onRemove(role)}
         className="ml-2 p-0.5 rounded-full text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
-        aria-label={`Remove role ${role}`}
+        aria-label={t('staff.removeRole', { role })}
       >
         <svg
           className="h-3.5 w-3.5"
@@ -104,6 +106,7 @@ function SortableRoleItem({ role, onRemove }: SortableRoleItemProps) {
 }
 
 function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [priorityRoles, setPriorityRoles] = useState<string[]>([]);
   const [minHours, setMinHours] = useState<string>("");
@@ -162,7 +165,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
   return (
     <div className="mb-6">
       <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-slate-100 border-b dark:border-slate-600 pb-2">
-        Add New Staff
+        {t('staff.addNewStaff')}
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4 mt-4">
         {/* Name Input */}
@@ -171,7 +174,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
             htmlFor="staff-name-input"
             className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-1"
           >
-            Staff Name:
+            {t('staff.staffName')}
           </label>
           <input
             type="text"
@@ -187,7 +190,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
           {/* Left: Available Roles */}
           <div>
             <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">
-              Available Roles:
+              {t('staff.availableRoles')}
             </label>
             {availableRoles.length > 0 ? (
               <ul className="space-y-1">
@@ -202,21 +205,21 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
                       onClick={() => handleAddRoleToPriority(role)}
                       className="text-xs text-indigo-600 dark:text-blue-400 hover:text-indigo-900 dark:hover:text-blue-300 font-medium"
                     >
-                      Add »
+                      {t('staff.addRoleButton')}
                     </button>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="text-xs text-gray-500 dark:text-slate-400 italic">
-                All defined roles are assigned.
+                {t('staff.allRolesAssigned')}
               </p>
             )}
           </div>
           {/* Right: Assigned Roles (Sortable) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-              Assigned & Prioritized Roles:
+              {t('staff.assignedRoles')}
             </label>
             {priorityRoles.length > 0 ? (
               <DndContext
@@ -241,8 +244,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
               </DndContext>
             ) : (
               <p className="text-xs text-gray-500 dark:text-slate-400 italic">
-                Add roles from the left. Drag to reorder (top is highest
-                priority).
+                {t('staff.dragToReorderInstructions')}
               </p>
             )}
           </div>
@@ -254,7 +256,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
               htmlFor="staff-min-hours-form"
               className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
             >
-              Min Weekly Hours (Optional):
+              {t('staff.minWeeklyHours')}
             </label>
             <input
               type="number"
@@ -271,7 +273,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
               htmlFor="staff-max-hours-form"
               className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"
             >
-              Max Weekly Hours (Optional):
+              {t('staff.maxWeeklyHours')}
             </label>
             <input
               type="number"
@@ -291,7 +293,7 @@ function StaffForm({ definedRoles, onAddStaff }: StaffFormProps) {
             type="submit"
             className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 dark:bg-blue-600 hover:bg-indigo-700 dark:hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-blue-400 transition duration-150 ease-in-out"
           >
-            Add Staff
+            {t('staff.addStaff')}
           </button>
         </div>
       </form>

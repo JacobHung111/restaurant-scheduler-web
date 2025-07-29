@@ -3,6 +3,7 @@ import type { StaffMember, Unavailability } from "../types";
 import UnavailabilityForm from "./UnavailabilityForm";
 import UnavailabilityList from "./UnavailabilityList";
 import ImportExportButtons from "./ImportExportButtons";
+import { useTranslation } from 'react-i18next';
 
 interface UnavailabilityPanelProps {
   staffList: StaffMember[];
@@ -23,17 +24,19 @@ function UnavailabilityPanel({
   onExportError,
   onNoDataToExport,
 }: UnavailabilityPanelProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
       <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-slate-100">
-        Staff Unavailability
+        {t('unavailability.staffUnavailability')}
       </h2>
       <ImportExportButtons
-        dataType="Unavailability"
+        dataType={t('unavailability.management')}
         dataToExport={unavailabilityList}
         onExportSuccess={onExportSuccess}
         onExportError={onExportError}
-        onNoDataToExport={() => onNoDataToExport?.('Unavailability')}
+        onNoDataToExport={() => onNoDataToExport?.(t('unavailability.management'))}
         importDisabled={true}
       />
       <UnavailabilityForm

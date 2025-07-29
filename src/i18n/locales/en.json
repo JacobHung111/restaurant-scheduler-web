@@ -1,0 +1,230 @@
+{
+  "app": {
+    "title": "Restaurant Scheduler",
+    "subtitle": "Manage staff, define needs, and generate weekly work schedules"
+  },
+  
+  "navigation": {
+    "staff": "Staff",
+    "unavailability": "Unavailability", 
+    "needs": "Needs",
+    "schedule": "Schedule"
+  },
+  
+  "dataOverview": {
+    "title": "Data Overview",
+    "staff": "Staff",
+    "unavailable": "Unavailable",
+    "needs": "Needs",
+    "days": "days",
+    "items": "items",
+    "actions": "Actions",
+    "history": "History",
+    "exportAllData": "Export All Data",
+    "downloadJson": "Download JSON",
+    "importData": "Import Data",
+    "bulkOrIndividual": "Bulk or individual JSON files"
+  },
+  
+  "staff": {
+    "management": "Staff Management",
+    "addNewStaff": "Add New Staff",
+    "addStaff": "Add Staff",
+    "staffName": "Staff Name:",
+    "staffList": "Staff List ({{count}})",
+    "dragHandleInstructions": "(Drag handle to reorder priority)",
+    "noStaffAdded": "No staff added yet. Use the form above.",
+    "name": "Name",
+    "roles": "Roles",
+    "availableRoles": "Available Roles:",
+    "assignedRoles": "Assigned & Prioritized Roles:",
+    "addRoleButton": "Add »",
+    "allRolesAssigned": "All defined roles are assigned.",
+    "dragToReorderInstructions": "Add roles from the left. Drag to reorder (top is highest priority).",
+    "minWeeklyHours": "Min Weekly Hours (Optional):",
+    "maxWeeklyHours": "Max Weekly Hours (Optional):",
+    "dragToReorderRole": "Drag to reorder role",
+    "removeRole": "Remove role {{role}}",
+    "priority": "Priority",
+    "delete": "Delete",
+    "export": "Export",
+    "import": "Import",
+    "dragToReorder": "Drag to reorder",
+    "deleteStaffMember": "Delete {{name}}",
+    "roles": "Roles",
+    "min": "Min",
+    "max": "Max"
+  },
+
+  "roles": {
+    "manageRoles": "Manage Roles",
+    "currentRoles": "Current Roles:",
+    "noRolesDefined": "No roles defined yet.",
+    "enterNewRoleName": "Enter new role name",
+    "deleteRole": "Delete role {{role}}",
+    "add": "Add"
+  },
+
+  "shiftDefinition": {
+    "defineShiftTimes": "Define Shift Times",
+    "amShift": "AM Shift (e.g., Morning)",
+    "pmShift": "PM Shift (e.g., Evening)",
+    "start": "Start:",
+    "end": "End:",
+    "hours": "Hours:",
+    "fullDayShift": "Full Day Shift:",
+    "invalidTimeFormat": "Invalid time format. Please use HH:MM (e.g., 11:00).",
+    "amEndMustEqualPmStart": "AM shift end time must equal PM shift start time."
+  },
+  
+  "unavailability": {
+    "management": "Unavailability Management",
+    "staffUnavailability": "Staff Unavailability",
+    "employee": "Employee",
+    "day": "Day",
+    "shift": "Shift",
+    "add": "Add",
+    "delete": "Delete",
+    "selectStaff": "Select Staff:",
+    "selectStaffOption": "-- Select Staff --",
+    "selectDay": "Select Day:",
+    "selectDayOption": "-- Select Day --",
+    "selectUnavailableShifts": "Select Unavailable Shifts:",
+    "addUnavailability": "Add Unavailability",
+    "allDay": "All Day",
+    "incompleteInformation": "Incomplete Unavailability Information",
+    "pleaseSelectAll": "Please select staff, day, and at least one unavailable shift.",
+    "unavailabilityList": "Unavailability List ({{count}}):",
+    "noUnavailabilityAdded": "No unavailability added yet.",
+    "unavailable": "Unavailable",
+    "unknown": "Unknown (ID: {{id}})",
+    "deleteUnavailability": "Delete unavailability for {{name}} on {{day}}"
+  },
+  
+  "needs": {
+    "weeklyNeeds": "Weekly Needs",
+    "defineNeeds": "Define staffing needs for each day and shift"
+  },
+  
+  "schedule": {
+    "shiftConfiguration": "Shift Configuration",
+    "schedulePreferences": "Schedule Preferences",
+    "prioritizeFullDays": "Prioritize Full Days",
+    "prioritizeHalfDays": "Prioritize Half Days", 
+    "noPreference": "No Preference",
+    "generateSchedule": "Generate Weekly Schedule",
+    "generating": "Generating...",
+    "scheduleDisplay": "Schedule Display",
+    "warnings": "Warnings:",
+    "staffDay": "Staff / Day",
+    "noScheduleGenerated": "No schedule generated yet or an error occurred.",
+    "noShiftsAssigned": "Schedule generated, but no shifts were assigned."
+  },
+  
+  "days": {
+    "monday": "Monday",
+    "tuesday": "Tuesday", 
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
+  
+  "shifts": {
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "night": "Night",
+    "HALF_DAY_AM": "AM Shift",
+    "HALF_DAY_PM": "PM Shift"
+  },
+  
+  "importExport": {
+    "import": "Import {{dataType}} (.json)",
+    "export": "Export {{dataType}} (.json)"
+  },
+  
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "export": "Export",
+    "import": "Import",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "confirm": "Confirm"
+  },
+  
+  "messages": {
+    "exportSuccess": "Export Successful",
+    "importSuccess": "Import Successful", 
+    "exportFailed": "Export Failed",
+    "importFailed": "Import Failed",
+    "noDataToExport": "No data available to export",
+    "invalidFileType": "Invalid file type",
+    "fileReadError": "Error reading file"
+  },
+  
+  "dragDrop": {
+    "releaseToUpload": "Release to Upload",
+    "dropJsonFile": "Drop your JSON file to import data",
+    "jsonFilesOnly": "JSON files only"
+  },
+
+  "history": {
+    "title": "History",
+    "saveCurrentState": "Save Current State",
+    "generateScheduleFirst": "Generate a schedule first to save",
+    "storageLimitReached": "Storage limit reached",
+    "deleteOldRecordsMessage": "Delete old records to save new ones (max 3 records)",
+    "noHistoryRecords": "No history records yet",
+    "generateAndSaveMessage": "Generate and save schedules to build history",
+    "staff": "staff",
+    "constraints": "constraints",
+    "enterRecordName": "Enter record name",
+    "saveChanges": "Save changes",
+    "cancelEditing": "Cancel editing",
+    "editRecord": "Edit {{name}}",
+    "deleteRecord": "Delete {{name}}",
+    "clickToLoadOrDelete": "Click a record to load, or delete to free up space",
+    "deleteHistoryRecord": "Delete History Record",
+    "confirmDeleteMessage": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "deleteCta": "Delete",
+    "cancel": "Cancel",
+    "saveFailed": "Save Failed",
+    "noScheduleAvailable": "No schedule available to save.",
+    "recordSaved": "Record Saved",
+    "recordSavedSuccess": "History record saved successfully.",
+    "recordDeleted": "Record Deleted",
+    "recordDeletedSuccess": "\"{{name}}\" has been deleted.",
+    "deleteFailed": "Delete Failed",
+    "deleteFailedMessage": "Failed to delete record.",
+    "recordLoaded": "Record Loaded",
+    "recordLoadedSuccess": "\"{{name}}\" has been loaded successfully.",
+    "loadFailed": "Load Failed",
+    "loadFailedMessage": "Failed to load record.",
+    "recordRenamed": "Record Renamed",
+    "recordRenamedSuccess": "History record has been renamed successfully."
+  },
+
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "themeLabel": "Theme: {{theme}} (click to cycle)"
+  },
+  
+  "language": {
+    "english": "English",
+    "french": "French", 
+    "traditionalChinese": "Traditional Chinese",
+    "simplifiedChinese": "Simplified Chinese",
+    "selectLanguage": "Select Language"
+  }
+}

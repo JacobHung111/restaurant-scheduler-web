@@ -1,5 +1,6 @@
 // src/components/ImportExportButtons.tsx
 import React, { useRef } from "react";
+import { useTranslation } from 'react-i18next';
 import { logger } from "../utils/logger";
 
 interface ImportExportButtonsProps<T> {
@@ -21,6 +22,7 @@ function ImportExportButtons<T>({
   onNoDataToExport,
   importDisabled = false,
 }: ImportExportButtonsProps<T>) {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
@@ -122,7 +124,7 @@ function ImportExportButtons<T>({
           onClick={handleImportClick}
           className="px-4 py-2 text-sm font-medium rounded-lg shadow-sm text-white bg-teal-600 dark:bg-teal-500 hover:bg-teal-700 dark:hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all duration-200"
         >
-          Import {dataType} (.json)
+          {t('importExport.import', { dataType })}
         </button>
       )}
       <button
@@ -130,7 +132,7 @@ function ImportExportButtons<T>({
         onClick={handleExport}
         className="px-4 py-2 text-sm font-medium rounded-lg shadow-sm text-white bg-gray-600 dark:bg-slate-600 hover:bg-gray-700 dark:hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-slate-400 transition-all duration-200"
       >
-        Export {dataType} (.json)
+        {t('importExport.export', { dataType })}
       </button>
     </div>
   );

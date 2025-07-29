@@ -1,5 +1,6 @@
 // src/components/HistoryPanel.tsx
 import { useShallow } from 'zustand/react/shallow';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogPanel, DialogTitle, DialogBackdrop } from '@headlessui/react';
 import { 
   ClockIcon, 
@@ -37,6 +38,8 @@ function HistoryPanel({
   isOpen,
   onClose
 }: HistoryPanelProps) {
+  const { t } = useTranslation();
+  
   const { 
     records, 
     saveRecord, 
@@ -93,7 +96,7 @@ function HistoryPanel({
 
   const handleSaveRecord = () => {
     if (!generatedSchedule) {
-      showMessage('error', 'Save Failed', 'No schedule available to save.');
+      showMessage('error', t('history.saveFailed'), t('history.noScheduleAvailable'));
       return;
     }
     
@@ -106,13 +109,13 @@ function HistoryPanel({
     );
 
     if (result.success) {
-      showMessage('success', 'Record Saved', 'History record saved successfully.');
+      showMessage('success', t('history.recordSaved'), t('history.recordSavedSuccess'));
     } else if (result.isLimitReached) {
       setShowLimitWarning(true);
       setTimeout(() => setShowLimitWarning(false), 5000);
-      showMessage('warning', 'Storage Limit Reached', result.error || 'Maximum records reached.');
+      showMessage('warning', t('history.storageLimitReached'), result.error || t('history.deleteOldRecordsMessage'));
     } else {
-      showMessage('error', 'Save Failed', result.error || 'Failed to save record.');
+      showMessage('error', t('history.saveFailed'), result.error || t('history.recordSavedSuccess'));
     }
   };
 
@@ -124,9 +127,9 @@ function HistoryPanel({
     const result = deleteRecord(deleteConfirm.id);
     
     if (result.success) {
-      showMessage('success', 'Record Deleted', `"${deleteConfirm.name}" has been deleted.`);
+      showMessage('success', t('history.recordDeleted'), t('history.recordDeletedSuccess', { name: deleteConfirm.name }));
     } else {
-      showMessage('error', 'Delete Failed', result.error || 'Failed to delete record.');
+      showMessage('error', t('history.deleteFailed'), result.error || t('history.deleteFailedMessage'));
     }
     
     setDeleteConfirm({ isOpen: false, id: '', name: '' });
@@ -151,10 +154,10 @@ function HistoryPanel({
       )];
       setDefinedRoles(allRoles);
 
-      showMessage('success', 'Record Loaded', `"${result.record.name}" has been loaded successfully.`);
+      showMessage('success', t('history.recordLoaded'), t('history.recordLoadedSuccess', { name: result.record.name }));
       logger.log('History record loaded:', result.record.name);
     } else {
-      showMessage('error', 'Load Failed', result.error || 'Failed to load record.');
+      showMessage('error', t('history.loadFailed'), result.error || t('history.loadFailedMessage'));
     }
   };
 
@@ -165,7 +168,7 @@ function HistoryPanel({
   const handleSaveEdit = () => {
     const result = saveEditingRecord();
     if (result.success) {
-      showMessage('success', 'Record Renamed', 'History record has been renamed successfully.');
+      showMessage('success', t('history.recordRenamed'), t('history.recordRenamedSuccess'));
     }
     // Note: Error handling is done in the store and displayed inline
   };
@@ -193,7 +196,7 @@ function HistoryPanel({
                 <div className="flex items-center space-x-2">
                   <ClockIcon className="w-5 h-5 text-gray-600 dark:text-slate-400" />
                   <DialogTitle className="text-lg font-medium text-gray-900 dark:text-slate-100">
-                    History
+                    {t('history.title')}
                   </DialogTitle>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -224,12 +227,12 @@ function HistoryPanel({
                 `}
               >
                 <BookmarkIcon className="w-4 h-4" />
-                <span>Save Current State</span>
+                <span>{t('history.saveCurrentState')}</span>
               </button>
               
               {!canSave && (
                 <p className="mt-2 text-xs text-gray-500 dark:text-slate-400 text-center">
-                  Generate a schedule first to save
+                  {t('history.generateScheduleFirst')}
                 </p>
               )}
 
@@ -239,8 +242,8 @@ function HistoryPanel({
                   <div className="flex items-start space-x-2">
                     <ExclamationTriangleIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
                     <div className="text-xs text-yellow-700 dark:text-yellow-300">
-                      <p className="font-medium">Storage limit reached</p>
-                      <p>Delete old records to save new ones (max 3 records)</p>
+                      <p className="font-medium">{t('history.storageLimitReached')}</p>
+                      <p>{t('history.deleteOldRecordsMessage')}</p>
                     </div>
                   </div>
                 </div>
@@ -253,10 +256,10 @@ function HistoryPanel({
                 <div className="p-6 text-center">
                   <ClockIcon className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
                   <p className="text-sm text-gray-500 dark:text-slate-400">
-                    No history records yet
+                    {t('history.noHistoryRecords')}
                   </p>
                   <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
-                    Generate and save schedules to build history
+                    {t('history.generateAndSaveMessage')}
                   </p>
                 </div>
               ) : (
@@ -278,20 +281,20 @@ function HistoryPanel({
                                 value={editingRecord.tempName}
                                 onChange={handleEditNameChange}
                                 className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-blue-400"
-                                placeholder="Enter record name"
+                                placeholder={t('history.enterRecordName')}
                                 autoFocus
                               />
                               <button
                                 onClick={handleSaveEdit}
                                 className="p-1.5 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
-                                title="Save changes"
+                                title={t('history.saveChanges')}
                               >
                                 <CheckIcon className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={handleCancelEdit}
                                 className="p-1.5 text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-slate-400"
-                                title="Cancel editing"
+                                title={t('history.cancelEditing')}
                               >
                                 <XMarkIcon className="w-4 h-4" />
                               </button>
@@ -304,7 +307,7 @@ function HistoryPanel({
                             )}
                             
                             <div className="text-xs text-gray-500 dark:text-slate-400">
-                              {record.data.staffList.length} staff, {record.data.unavailabilityList.length} constraints
+                              {record.data.staffList.length} {t('history.staff')}, {record.data.unavailabilityList.length} {t('history.constraints')}
                             </div>
                           </div>
                         ) : (
@@ -318,7 +321,7 @@ function HistoryPanel({
                                 {record.name}
                               </div>
                               <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">
-                                {record.data.staffList.length} staff, {record.data.unavailabilityList.length} constraints
+                                {record.data.staffList.length} {t('history.staff')}, {record.data.unavailabilityList.length} {t('history.constraints')}
                               </div>
                             </button>
                             
@@ -326,14 +329,14 @@ function HistoryPanel({
                               <button
                                 onClick={() => handleEditRecord(record.id, record.name)}
                                 className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                                title={`Edit ${record.name}`}
+                                title={t('history.editRecord', { name: record.name })}
                               >
                                 <PencilIcon className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDeleteRecord(record.id, record.name)}
                                 className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400"
-                                title={`Delete ${record.name}`}
+                                title={t('history.deleteRecord', { name: record.name })}
                               >
                                 <TrashIcon className="w-4 h-4" />
                               </button>
@@ -351,7 +354,7 @@ function HistoryPanel({
             {records.length > 0 && (
               <div className="p-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/30 rounded-b-xl flex-shrink-0">
                 <p className="text-xs text-gray-500 dark:text-slate-400 text-center">
-                  Click a record to load, or delete to free up space
+                  {t('history.clickToLoadOrDelete')}
                 </p>
               </div>
             )}
@@ -364,10 +367,10 @@ function HistoryPanel({
         isOpen={deleteConfirm.isOpen}
         onClose={() => setDeleteConfirm({ isOpen: false, id: '', name: '' })}
         onConfirm={confirmDelete}
-        title="Delete History Record"
-        message={`Are you sure you want to delete "${deleteConfirm.name}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('history.deleteHistoryRecord')}
+        message={t('history.confirmDeleteMessage', { name: deleteConfirm.name })}
+        confirmText={t('history.deleteCta')}
+        cancelText={t('history.cancel')}
         type="danger"
       />
     </>

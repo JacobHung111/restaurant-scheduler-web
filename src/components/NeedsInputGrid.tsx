@@ -1,7 +1,8 @@
 // src/components/NeedsInputGrid.tsx
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import type { WeeklyNeeds } from "../types";
-import { DAYS_OF_WEEK, SHIFT_TYPES, SHIFT_TYPE_LABELS } from "../config";
+import { DAYS_OF_WEEK, SHIFT_TYPES } from "../config";
 import type { ShiftType } from "../config";
 import { logger } from "../utils/logger";
 
@@ -21,6 +22,8 @@ function NeedsInputGrid({
   definedRoles,
   onNeedsChange,
 }: NeedsInputGridProps) {
+  const { t } = useTranslation();
+  
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     const day = event.target.dataset.day;
@@ -58,13 +61,13 @@ function NeedsInputGrid({
           className="day-needs border border-gray-200 dark:border-slate-700 p-3 sm:p-4 rounded-lg bg-white dark:bg-slate-800 shadow hover:shadow-md transition-shadow duration-200 w-full"
         >
           <h4 className="text-sm sm:text-md font-semibold mb-2 sm:mb-3 text-center text-indigo-700 dark:text-blue-400 border-b border-gray-200 dark:border-slate-600 pb-2">
-            {day}
+            {t(`days.${day.toLowerCase()}`)}
           </h4>
           <div className="space-y-3 sm:space-y-4">
             {SHIFT_TYPES.map((shiftType) => (
               <div key={shiftType} className="shift-needs">
                 <h5 className="text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-600 dark:text-slate-300">
-                  {SHIFT_TYPE_LABELS[shiftType]}
+                  {t(`shifts.${shiftType}`)}
                 </h5>
                 <div className="space-y-1 sm:space-y-1.5">
                   {definedRoles.map((role) => {

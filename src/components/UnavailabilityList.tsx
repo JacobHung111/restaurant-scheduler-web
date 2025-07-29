@@ -1,5 +1,6 @@
 // src/components/UnavailabilityList.tsx
 import type { Unavailability, StaffMember } from "../types";
+import { useTranslation } from 'react-i18next';
 import { timeToMinutes } from "../utils";
 import { DAYS_OF_WEEK } from "../config";
 
@@ -14,10 +15,12 @@ function UnavailabilityList({
   staffList,
   onDeleteUnavailability,
 }: UnavailabilityListProps) {
+  const { t } = useTranslation();
+  
   // Helper to get staff name from ID
   const getStaffName = (id: string): string => {
     const staff = staffList.find((s) => s.id === id);
-    return staff ? staff.name : `Unknown (ID: ${id})`;
+    return staff ? staff.name : t('unavailability.unknown', { id });
   };
 
   // Group unavailability by employee and day
@@ -57,11 +60,11 @@ function UnavailabilityList({
   return (
     <div className="mt-6 border-t border-gray-200 dark:border-slate-600 pt-4">
       <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-slate-300">
-        Unavailability List ({sortedGroupedItems.length}):
+        {t('unavailability.unavailabilityList', { count: sortedGroupedItems.length })}
       </h3>
       {sortedGroupedItems.length === 0 ? (
         <p className="text-sm text-gray-500 dark:text-slate-400 italic">
-          No unavailability added yet.
+          {t('unavailability.noUnavailabilityAdded')}
         </p>
       ) : (
         <div className="flow-root">
@@ -71,7 +74,7 @@ function UnavailabilityList({
                 .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start))
                 .map((s) =>
                   s.start === "00:00" && s.end === "23:59"
-                    ? "All Day"
+                    ? t('unavailability.allDay')
                     : `${s.start}-${s.end}`
                 )
                 .join(", ");
@@ -85,10 +88,10 @@ function UnavailabilityList({
                     <strong className="font-medium text-gray-900 dark:text-slate-100">
                       {staffName}
                     </strong>{" "}
-                    - {item.dayOfWeek}
+                    - {t(`days.${item.dayOfWeek.toLowerCase()}`)}
                     <br />
                     <span className="text-xs text-gray-500 dark:text-slate-400">
-                      Unavailable: {shiftTexts}
+                      {t('unavailability.unavailable')}: {shiftTexts}
                     </span>
                   </span>
                   <button
@@ -96,9 +99,9 @@ function UnavailabilityList({
                       onDeleteUnavailability(item.employeeId, item.dayOfWeek)
                     }
                     className="ml-4 px-2.5 py-1 text-xs font-medium text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded hover:bg-red-200 dark:hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 dark:focus:ring-red-400 flex-shrink-0 transition duration-150 ease-in-out"
-                    aria-label={`Delete unavailability for ${staffName} on ${item.dayOfWeek}`}
+                    aria-label={t('unavailability.deleteUnavailability', { name: staffName, day: t(`days.${item.dayOfWeek.toLowerCase()}`) })}
                   >
-                    Delete
+                    {t('unavailability.delete')}
                   </button>
                 </li>
               );

@@ -1,0 +1,229 @@
+{
+  "app": {
+    "title": "餐厅排班系统",
+    "subtitle": "管理员工、定义需求，并生成周工作时间表"
+  },
+
+  "navigation": {
+    "staff": "员工",
+    "unavailability": "请假",
+    "needs": "需求",
+    "schedule": "排班"
+  },
+
+  "dataOverview": {
+    "title": "数据概览",
+    "staff": "员工",
+    "unavailable": "请假",
+    "needs": "需求",
+    "days": "天",
+    "items": "项目",
+    "actions": "操作",
+    "history": "历史记录",
+    "exportAllData": "导出所有数据",
+    "downloadJson": "下载 JSON",
+    "importData": "导入数据",
+    "bulkOrIndividual": "批量或个别 JSON 文件"
+  },
+
+  "staff": {
+    "management": "员工管理",
+    "addNewStaff": "新增员工",
+    "addStaff": "新增员工",
+    "staffName": "员工姓名：",
+    "staffList": "员工清单 ({{count}})",
+    "dragHandleInstructions": "（拖拽把手重新排序优先级）",
+    "noStaffAdded": "尚未新增员工。请使用上方表单。",
+    "name": "姓名",
+    "roles": "职位",
+    "availableRoles": "可选职位：",
+    "assignedRoles": "已分配和优先排序的职位：",
+    "addRoleButton": "新增 »",
+    "allRolesAssigned": "所有已定义的职位均已分配。",
+    "dragToReorderInstructions": "从左边新增职位。拖拽重新排序（顶部为最高优先级）。",
+    "minWeeklyHours": "最少周工时（可选）：",
+    "maxWeeklyHours": "最多周工时（可选）：",
+    "dragToReorderRole": "拖拽重新排序职位",
+    "removeRole": "移除职位 {{role}}",
+    "priority": "优先级",
+    "delete": "删除",
+    "export": "导出",
+    "import": "导入",
+    "dragToReorder": "拖拽重新排序",
+    "deleteStaffMember": "删除 {{name}}",
+    "min": "最少",
+    "max": "最多"
+  },
+
+  "roles": {
+    "manageRoles": "管理职位",
+    "currentRoles": "当前职位：",
+    "noRolesDefined": "尚未定义任何职位。",
+    "enterNewRoleName": "输入新职位名称",
+    "deleteRole": "删除职位 {{role}}",
+    "add": "新增"
+  },
+
+  "shiftDefinition": {
+    "defineShiftTimes": "定义班次时间",
+    "amShift": "上午班次 (例如：早班)",
+    "pmShift": "下午班次 (例如：晚班)",
+    "start": "开始：",
+    "end": "结束：",
+    "hours": "小时：",
+    "fullDayShift": "全天班次：",
+    "invalidTimeFormat": "时间格式无效。请使用 HH:MM (例如：11:00)。",
+    "amEndMustEqualPmStart": "上午班次的结束时间必须等于下午班次的开始时间。"
+  },
+
+  "unavailability": {
+    "management": "请假管理",
+    "staffUnavailability": "员工请假",
+    "employee": "员工",
+    "day": "日期",
+    "shift": "班次",
+    "add": "新增",
+    "delete": "删除",
+    "selectStaff": "选择员工：",
+    "selectStaffOption": "-- 选择员工 --",
+    "selectDay": "选择日期：",
+    "selectDayOption": "-- 选择日期 --",
+    "selectUnavailableShifts": "选择请假班次：",
+    "addUnavailability": "新增请假",
+    "allDay": "全天",
+    "incompleteInformation": "请假信息不完整",
+    "pleaseSelectAll": "请选择员工、日期以及至少一个请假班次。",
+    "unavailabilityList": "请假清单 ({{count}})：",
+    "noUnavailabilityAdded": "尚未新增请假记录。",
+    "unavailable": "请假",
+    "unknown": "未知 (ID: {{id}})",
+    "deleteUnavailability": "删除 {{name}} 在 {{day}} 的请假记录"
+  },
+
+  "needs": {
+    "weeklyNeeds": "每周需求",
+    "defineNeeds": "为每天和每个班次定义人员需求"
+  },
+
+  "schedule": {
+    "shiftConfiguration": "班次设定",
+    "schedulePreferences": "排班偏好",
+    "prioritizeFullDays": "优先安排全天班",
+    "prioritizeHalfDays": "优先安排半天班",
+    "noPreference": "无偏好",
+    "generateSchedule": "生成周排班表",
+    "generating": "生成中...",
+    "scheduleDisplay": "排班表显示",
+    "warnings": "警告：",
+    "staffDay": "员工 / 日期",
+    "noScheduleGenerated": "尚未生成排班表或发生错误。",
+    "noShiftsAssigned": "已生成排班表，但未分配任何班次。"
+  },
+
+  "days": {
+    "monday": "星期一",
+    "tuesday": "星期二",
+    "wednesday": "星期三",
+    "thursday": "星期四",
+    "friday": "星期五",
+    "saturday": "星期六",
+    "sunday": "星期日"
+  },
+
+  "shifts": {
+    "morning": "早班",
+    "afternoon": "午班",
+    "evening": "晚班",
+    "night": "夜班",
+    "HALF_DAY_AM": "上午",
+    "HALF_DAY_PM": "下午"
+  },
+
+  "importExport": {
+    "import": "导入 {{dataType}} (.json)",
+    "export": "导出 {{dataType}} (.json)"
+  },
+
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "close": "关闭",
+    "edit": "编辑",
+    "delete": "删除",
+    "add": "新增",
+    "export": "导出",
+    "import": "导入",
+    "loading": "加载中...",
+    "success": "成功",
+    "error": "错误",
+    "warning": "警告",
+    "confirm": "确认"
+  },
+
+  "messages": {
+    "exportSuccess": "导出成功",
+    "importSuccess": "导入成功",
+    "exportFailed": "导出失败",
+    "importFailed": "导入失败",
+    "noDataToExport": "没有可导出的数据",
+    "invalidFileType": "无效的文件类型",
+    "fileReadError": "文件读取错误"
+  },
+
+  "dragDrop": {
+    "releaseToUpload": "放开以上传",
+    "dropJsonFile": "拖放您的 JSON 文件以导入数据",
+    "jsonFilesOnly": "仅限 JSON 文件"
+  },
+
+  "history": {
+    "title": "历史记录",
+    "saveCurrentState": "保存当前状态",
+    "generateScheduleFirst": "请先生成排班表以便保存",
+    "storageLimitReached": "存储空间已满",
+    "deleteOldRecordsMessage": "删除旧记录以保存新记录（最多 3 条记录）",
+    "noHistoryRecords": "暂无历史记录",
+    "generateAndSaveMessage": "生成并保存排班表以建立历史记录",
+    "staff": "员工",
+    "constraints": "限制",
+    "enterRecordName": "输入记录名称",
+    "saveChanges": "保存更改",
+    "cancelEditing": "取消编辑",
+    "editRecord": "编辑 {{name}}",
+    "deleteRecord": "删除 {{name}}",
+    "clickToLoadOrDelete": "点击记录以加载，或删除以释放空间",
+    "deleteHistoryRecord": "删除历史记录",
+    "confirmDeleteMessage": "您确定要删除「{{name}}」吗？此操作无法撤销。",
+    "deleteCta": "删除",
+    "cancel": "取消",
+    "saveFailed": "保存失败",
+    "noScheduleAvailable": "没有可保存的排班表。",
+    "recordSaved": "记录已保存",
+    "recordSavedSuccess": "历史记录已成功保存。",
+    "recordDeleted": "记录已删除",
+    "recordDeletedSuccess": "「{{name}}」已被删除。",
+    "deleteFailed": "删除失败",
+    "deleteFailedMessage": "记录删除失败。",
+    "recordLoaded": "记录已加载",
+    "recordLoadedSuccess": "「{{name}}」已成功加载。",
+    "loadFailed": "加载失败",
+    "loadFailedMessage": "记录加载失败。",
+    "recordRenamed": "记录已重命名",
+    "recordRenamedSuccess": "历史记录已成功重命名。"
+  },
+
+  "theme": {
+    "light": "浅色",
+    "dark": "深色",
+    "system": "系统",
+    "themeLabel": "主题：{{theme}}（点击切换）"
+  },
+
+  "language": {
+    "english": "英文",
+    "french": "法文",
+    "traditionalChinese": "繁体中文",
+    "simplifiedChinese": "简体中文",
+    "selectLanguage": "选择语言"
+  }
+}

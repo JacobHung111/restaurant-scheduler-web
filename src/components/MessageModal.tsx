@@ -1,6 +1,7 @@
 // src/components/MessageModal.tsx
 import { Dialog, DialogPanel, DialogTitle, DialogBackdrop } from '@headlessui/react';
 import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 export type MessageType = 'success' | 'warning' | 'error';
 
@@ -14,6 +15,8 @@ interface MessageModalProps {
 }
 
 function MessageModal({ isOpen, onClose, type, title, message, details }: MessageModalProps) {
+  const { t } = useTranslation();
+  
   const getIcon = () => {
     switch (type) {
       case 'success':
@@ -96,7 +99,7 @@ function MessageModal({ isOpen, onClose, type, title, message, details }: Messag
                 onClick={onClose}
                 className="px-4 py-2 bg-gray-600 dark:bg-slate-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-slate-500 transition-all duration-200"
               >
-                OK
+                {t('common.close')}
               </button>
             </div>
           </div>
