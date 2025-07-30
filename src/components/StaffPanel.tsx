@@ -13,14 +13,6 @@ interface StaffPanelProps {
   onAddStaff: (data: Omit<StaffMember, "id">) => void;
   onDeleteStaff: (id: string) => void;
   onReorderStaff: (list: StaffMember[]) => void;
-  onExportSuccess?: (fileName: string, dataType: string) => void;
-  onExportError?: (error: string) => void;
-  onNoDataToExport?: (dataType: string) => void;
-}
-
-interface StaffManagementExportData {
-  staffList: StaffMember[];
-  definedRoles: string[];
 }
 
 // RoleManager component integrated into StaffPanel
@@ -110,46 +102,8 @@ function StaffPanel({
   onAddStaff,
   onDeleteStaff,
   onReorderStaff,
-  onExportSuccess,
-  onExportError,
-  onNoDataToExport,
 }: StaffPanelProps) {
   const { t } = useTranslation();
-  
-  // Create export data that includes both staffList and definedRoles
-  const exportData: StaffManagementExportData = {
-    staffList,
-    definedRoles,
-  };
-
-  // Check if there's data to export
-  const hasDataToExport = staffList.length > 0 || definedRoles.length > 0;
-
-  const handleExport = () => {
-    if (!hasDataToExport) {
-      onNoDataToExport?.(t('staff.management'));
-      return;
-    }
-
-    try {
-      const jsonString = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const fileName = `${t('staff.management')
-        .toLowerCase()
-        .replace(/\s+/g, "_")}_data.json`;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      onExportSuccess?.(fileName, t('staff.management'));
-    } catch (error) {
-      onExportError?.(error instanceof Error ? error.message : 'Unknown export error');
-    }
-  };
 
   return (
     <div className="p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
@@ -157,16 +111,6 @@ function StaffPanel({
         {t('staff.management')}
       </h2>
       
-      {/* Custom export button */}
-      <div className="io-buttons border-b border-gray-200 dark:border-slate-600 pb-4 mb-4 flex gap-3 flex-wrap items-center">
-        <button
-          type="button"
-          onClick={handleExport}
-          className="px-4 py-2 text-sm font-medium rounded-lg shadow-sm text-white bg-gray-600 dark:bg-slate-600 hover:bg-gray-700 dark:hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-slate-400 transition-all duration-200"
-        >
-          {t('importExport.export', { dataType: t('staff.management') })}
-        </button>
-      </div>
 
       {/* Integrated Role Manager */}
       <RoleManager />

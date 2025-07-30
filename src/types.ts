@@ -29,7 +29,7 @@ export interface StaffMember {
 export interface Unavailability {
   employeeId: string;
   dayOfWeek: string;
-  shifts: ShiftTime[];
+  shifts: ('AM' | 'PM')[];
 }
 
 // Weekly needs structure

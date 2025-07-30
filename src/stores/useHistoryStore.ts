@@ -6,14 +6,17 @@ import { logger } from '../utils/logger';
 
 export interface HistoryRecord {
   id: string;
-  name: string; // 日期時間格式的名稱
+  name: string; // Date-time formatted name
   timestamp: number;
   data: {
     staffList: StaffMember[];
+    definedRoles: string[];
     unavailabilityList: Unavailability[];
     weeklyNeeds: WeeklyNeeds;
     shiftDefinitions: ShiftDefinitions;
     generatedSchedule: Schedule;
+    shiftPreference: 'PRIORITIZE_FULL_DAYS' | 'PRIORITIZE_HALF_DAYS' | 'NONE';
+    warnings: string[];
   };
 }
 
@@ -28,10 +31,13 @@ interface HistoryState {
   // Actions
   saveRecord: (
     staffList: StaffMember[],
+    definedRoles: string[],
     unavailabilityList: Unavailability[],
     weeklyNeeds: WeeklyNeeds,
     shiftDefinitions: ShiftDefinitions,
-    generatedSchedule: Schedule
+    generatedSchedule: Schedule,
+    shiftPreference: 'PRIORITIZE_FULL_DAYS' | 'PRIORITIZE_HALF_DAYS' | 'NONE',
+    warnings: string[]
   ) => { success: boolean; error?: string; isLimitReached?: boolean };
   deleteRecord: (id: string) => { success: boolean; error?: string };
   loadRecord: (id: string) => { success: boolean; error?: string; record?: HistoryRecord };
@@ -49,7 +55,7 @@ interface HistoryState {
 
 const MAX_RECORDS = 3;
 
-// 驗證記錄名稱
+// Validate record name
 const validateRecordName = (name: string, existingNames: string[]): { isValid: boolean; error?: string } => {
   const trimmedName = name.trim();
   
@@ -83,7 +89,7 @@ const validateRecordName = (name: string, existingNames: string[]): { isValid: b
   return { isValid: true };
 };
 
-// 生成日期時間格式的名稱
+// Generate date-time formatted name
 const generateRecordName = (): string => {
   const now = new Date();
   const year = now.getFullYear();
@@ -105,11 +111,11 @@ export const useHistoryStore = create<HistoryState>()(
       deleteConfirm: { isOpen: false, id: '', name: '' },
       editingRecord: null,
 
-      saveRecord: (staffList, unavailabilityList, weeklyNeeds, shiftDefinitions, generatedSchedule) => {
+      saveRecord: (staffList, definedRoles, unavailabilityList, weeklyNeeds, shiftDefinitions, generatedSchedule, shiftPreference, warnings) => {
         try {
           const currentRecords = get().records;
           
-          // 檢查是否達到最大記錄數量
+          // Check if maximum record count is reached
           if (currentRecords.length >= MAX_RECORDS) {
             logger.log('History save blocked: maximum records reached');
             return { 
@@ -119,7 +125,7 @@ export const useHistoryStore = create<HistoryState>()(
             };
           }
 
-          // 驗證必要數據
+          // Validate required data
           if (!generatedSchedule || Object.keys(generatedSchedule).length === 0) {
             return { 
               success: false, 
@@ -134,10 +140,13 @@ export const useHistoryStore = create<HistoryState>()(
             timestamp: now,
             data: {
               staffList: [...staffList],
+              definedRoles: [...definedRoles],
               unavailabilityList: [...unavailabilityList],
               weeklyNeeds: { ...weeklyNeeds },
               shiftDefinitions: { ...shiftDefinitions },
-              generatedSchedule: { ...generatedSchedule }
+              generatedSchedule: { ...generatedSchedule },
+              shiftPreference,
+              warnings: [...warnings]
             }
           };
 

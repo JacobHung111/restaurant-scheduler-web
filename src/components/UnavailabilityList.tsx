@@ -1,7 +1,8 @@
 // src/components/UnavailabilityList.tsx
 import type { Unavailability, StaffMember } from "../types";
 import { useTranslation } from 'react-i18next';
-import { timeToMinutes } from "../utils";
+import { useScheduleStore } from "../stores/useScheduleStore";
+import { useShallow } from 'zustand/react/shallow';
 import { DAYS_OF_WEEK } from "../config";
 
 interface UnavailabilityListProps {
@@ -16,6 +17,12 @@ function UnavailabilityList({
   onDeleteUnavailability,
 }: UnavailabilityListProps) {
   const { t } = useTranslation();
+  
+  const { shiftDefinitions } = useScheduleStore(
+    useShallow((state) => ({
+      shiftDefinitions: state.shiftDefinitions,
+    }))
+  );
   
   // Helper to get staff name from ID
   const getStaffName = (id: string): string => {
@@ -33,12 +40,7 @@ function UnavailabilityList({
     // Merge shifts, avoid duplicates
     if (Array.isArray(item.shifts)) {
       item.shifts.forEach((newShift) => {
-        if (
-          !groupedUnavailability[key].shifts.some(
-            (existing) =>
-              existing.start === newShift.start && existing.end === newShift.end
-          )
-        ) {
+        if (!groupedUnavailability[key].shifts.includes(newShift)) {
           groupedUnavailability[key].shifts.push(newShift);
         }
       });
@@ -71,12 +73,11 @@ function UnavailabilityList({
           <ul role="list" className="space-y-2">
             {sortedGroupedItems.map((item) => {
               const shiftTexts = item.shifts
-                .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start))
-                .map((s) =>
-                  s.start === "00:00" && s.end === "23:59"
-                    ? t('unavailability.allDay')
-                    : `${s.start}-${s.end}`
-                )
+                .sort((a, b) => a === 'AM' ? -1 : b === 'AM' ? 1 : 0) // AM first, then PM
+                .map((shiftType) => {
+                  const shiftDef = shiftType === 'AM' ? shiftDefinitions.HALF_DAY_AM : shiftDefinitions.HALF_DAY_PM;
+                  return `${shiftType} (${shiftDef.start}-${shiftDef.end})`;
+                })
                 .join(", ");
               const staffName = getStaffName(item.employeeId);
               return (

@@ -1,14 +1,16 @@
 // src/utils/importValidation.ts
-import type { StaffMember, Unavailability, WeeklyNeeds } from '../types';
+import type { StaffMember, Unavailability, WeeklyNeeds, ShiftDefinitions } from '../types';
 
-// 統一批量導入數據類型
+// Unified bulk import data types
 export interface BulkImportData {
   staffList?: StaffMember[];
+  definedRoles?: string[];
   unavailabilityList?: Unavailability[];
   weeklyNeeds?: WeeklyNeeds;
+  shiftDefinitions?: ShiftDefinitions;
 }
 
-// 數據驗證結果
+// Data validation result
 export interface ValidationResult {
   isValid: boolean;
   errors: string[];
@@ -37,11 +39,9 @@ export const isUnavailability = (obj: unknown): obj is Unavailability => {
     typeof unavail.employeeId === 'string' &&
     typeof unavail.dayOfWeek === 'string' &&
     Array.isArray(unavail.shifts) &&
-    unavail.shifts.every((shift: unknown) => {
-      if (typeof shift !== 'object' || shift === null) return false;
-      const s = shift as Record<string, unknown>;
-      return typeof s.start === 'string' && typeof s.end === 'string';
-    })
+    unavail.shifts.every((shift: unknown) => 
+      typeof shift === 'string' && (shift === 'AM' || shift === 'PM')
+    )
   );
 };
 
@@ -60,7 +60,31 @@ export const isWeeklyNeeds = (obj: unknown): obj is WeeklyNeeds => {
   });
 };
 
-// 主要驗證函數
+export const isDefinedRoles = (obj: unknown): obj is string[] => {
+  return Array.isArray(obj) && obj.every(role => typeof role === 'string' && role.trim().length > 0);
+};
+
+export const isShiftDefinitions = (obj: unknown): obj is ShiftDefinitions => {
+  if (typeof obj !== 'object' || obj === null) return false;
+  
+  const shifts = obj as Record<string, unknown>;
+  const requiredKeys = ['HALF_DAY_AM', 'HALF_DAY_PM', 'FULL_DAY'];
+  
+  return requiredKeys.every(key => {
+    const shift = shifts[key];
+    if (typeof shift !== 'object' || shift === null) return false;
+    
+    const shiftObj = shift as Record<string, unknown>;
+    return (
+      typeof shiftObj.start === 'string' &&
+      typeof shiftObj.end === 'string' &&
+      typeof shiftObj.hours === 'number' &&
+      shiftObj.hours > 0
+    );
+  });
+};
+
+// Main validation function
 export const validateBulkImportData = (rawData: unknown): ValidationResult => {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -77,7 +101,7 @@ export const validateBulkImportData = (rawData: unknown): ValidationResult => {
 
   const data = rawData as Record<string, unknown>;
 
-  // 驗證 staffList
+  // Validate staffList
   if (data.staffList !== undefined) {
     if (!Array.isArray(data.staffList)) {
       errors.push('staffList must be an array');
@@ -99,7 +123,16 @@ export const validateBulkImportData = (rawData: unknown): ValidationResult => {
     }
   }
 
-  // 驗證 unavailabilityList
+  // Validate definedRoles
+  if (data.definedRoles !== undefined) {
+    if (isDefinedRoles(data.definedRoles)) {
+      result.definedRoles = data.definedRoles;
+    } else {
+      errors.push('definedRoles must be an array of non-empty strings');
+    }
+  }
+
+  // Validate unavailabilityList
   if (data.unavailabilityList !== undefined) {
     if (!Array.isArray(data.unavailabilityList)) {
       errors.push('unavailabilityList must be an array');
@@ -121,7 +154,16 @@ export const validateBulkImportData = (rawData: unknown): ValidationResult => {
     }
   }
 
-  // 驗證 weeklyNeeds
+  // Validate shiftDefinitions
+  if (data.shiftDefinitions !== undefined) {
+    if (isShiftDefinitions(data.shiftDefinitions)) {
+      result.shiftDefinitions = data.shiftDefinitions;
+    } else {
+      errors.push('Invalid shiftDefinitions format');
+    }
+  }
+
+  // Validate weeklyNeeds
   if (data.weeklyNeeds !== undefined) {
     if (isWeeklyNeeds(data.weeklyNeeds)) {
       result.weeklyNeeds = data.weeklyNeeds;
@@ -130,8 +172,14 @@ export const validateBulkImportData = (rawData: unknown): ValidationResult => {
     }
   }
 
-  // 檢查是否有任何有效數據
-  const hasValidData = Boolean(result.staffList || result.unavailabilityList || result.weeklyNeeds);
+  // Check if there's any valid data
+  const hasValidData = Boolean(
+    result.staffList || 
+    result.definedRoles || 
+    result.unavailabilityList || 
+    result.weeklyNeeds || 
+    result.shiftDefinitions
+  );
   if (!hasValidData && errors.length === 0) {
     warnings.push('No valid data found to import');
   }
@@ -144,7 +192,7 @@ export const validateBulkImportData = (rawData: unknown): ValidationResult => {
   };
 };
 
-// 關聯性驗證：確保unavailability中的employeeId存在於staff中
+// Relationship validation: ensure employeeId in unavailability exists in staff
 export const validateDataRelationships = (data: BulkImportData): string[] => {
   const warnings: string[] = [];
   

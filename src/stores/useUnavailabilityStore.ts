@@ -1,6 +1,6 @@
 // src/stores/useUnavailabilityStore.ts
 import { create } from 'zustand';
-import type { Unavailability, ShiftTime } from '../types';
+import type { Unavailability } from '../types';
 import { logger } from '../utils/logger';
 
 interface OperationResult {
@@ -21,13 +21,13 @@ interface UnavailabilityState {
     employeeId: string, 
     dayOfWeek: string, 
     shiftIndex: number, 
-    newShift: ShiftTime
+    newShift: 'AM' | 'PM'
   ) => void;
 
   // Utilities
   getUnavailabilityForStaff: (employeeId: string) => Unavailability[];
   getUnavailabilityForDay: (employeeId: string, dayOfWeek: string) => Unavailability | undefined;
-  hasConflict: (employeeId: string, dayOfWeek: string, newShift: ShiftTime) => boolean;
+  hasConflict: (employeeId: string, dayOfWeek: string, newShift: 'AM' | 'PM') => boolean;
 }
 
 export const useUnavailabilityStore = create<UnavailabilityState>()((set, get) => ({
@@ -133,12 +133,7 @@ export const useUnavailabilityStore = create<UnavailabilityState>()((set, get) =
     
     if (!existingUnav) return false;
     
-    return existingUnav.shifts.some((shift) => {
-      return (
-        (newShift.start >= shift.start && newShift.start < shift.end) ||
-        (newShift.end > shift.start && newShift.end <= shift.end) ||
-        (newShift.start <= shift.start && newShift.end >= shift.end)
-      );
-    });
+    // Check if the shift type already exists for this employee and day
+    return existingUnav.shifts.includes(newShift);
   },
 }));

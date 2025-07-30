@@ -1,7 +1,7 @@
 // src/App.tsx
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import type { StaffMember, Unavailability, WeeklyNeeds, ShiftDefinitions } from "./types";
+import type { StaffMember, Unavailability } from "./types";
 import StaffPanel from "./components/StaffPanel";
 import UnavailabilityPanel from "./components/UnavailabilityPanel";
 import NeedsPanel from "./components/NeedsPanel";
@@ -76,156 +76,7 @@ function App() {
     }
   };
 
-  const handleImportStaffData = useCallback((data: unknown) => {
-    try {
-      // Check if data has the new format with definedRoles
-      if (typeof data === 'object' && data !== null && 
-          'staffList' in data && 'definedRoles' in data) {
-        const staffManagementData = data as { staffList: StaffMember[], definedRoles: string[] };
-        
-        // Import both staffList and definedRoles
-        staffStore.setStaffList(staffManagementData.staffList);
-        staffStore.setDefinedRoles(staffManagementData.definedRoles);
-        
-        scheduleStore.showMessage(
-          'success',
-          'Staff Management Import Successful',
-          `Successfully imported ${staffManagementData.staffList.length} staff members and ${staffManagementData.definedRoles.length} roles`,
-          [
-            ...staffManagementData.staffList.map(staff => `${staff.name} (${staff.assignedRolesInPriority.join(', ')})`),
-            `Roles: ${staffManagementData.definedRoles.join(', ')}`
-          ]
-        );
-        logger.log("Staff management data imported successfully:", data);
-      } else if (Array.isArray(data)) {
-        // Legacy format - just staff array
-        const staffList = data as StaffMember[];
-        staffStore.setStaffList(staffList);
-        scheduleStore.showMessage(
-          'success',
-          'Staff Import Successful',
-          `Successfully imported ${staffList.length} staff members`,
-          staffList.map(staff => `${staff.name} (${staff.assignedRolesInPriority.join(', ')})`)
-        );
-        logger.log("Staff data imported successfully:", data);
-      } else {
-        throw new Error('Invalid staff data format');
-      }
-    } catch (error) {
-      scheduleStore.showMessage(
-        'error',
-        'Staff Import Failed',
-        'Failed to import staff data. Please check the format.',
-        [error instanceof Error ? error.message : 'Unknown error occurred']
-      );
-      logger.error("Import error:", error);
-    }
-  }, [staffStore, scheduleStore]);
 
-  const handleImportUnavailabilityData = useCallback((data: unknown[]) => {
-    try {
-      const unavailabilityList = data as Unavailability[];
-      unavailabilityStore.setUnavailabilityList(unavailabilityList);
-      scheduleStore.showMessage(
-        'success',
-        'Unavailability Import Successful',
-        `Successfully imported ${unavailabilityList.length} unavailability entries`,
-        unavailabilityList.map(unavail => `${unavail.employeeId} - ${unavail.dayOfWeek}`)
-      );
-      logger.log("Unavailability data imported successfully:", data);
-    } catch (error) {
-      scheduleStore.showMessage(
-        'error',
-        'Unavailability Import Failed',
-        'Failed to import unavailability data. Please check the format.',
-        [error instanceof Error ? error.message : 'Unknown error occurred']
-      );
-      logger.error("Import error:", error);
-    }
-  }, [unavailabilityStore, scheduleStore]);
-
-  const handleImportNeedsData = useCallback((data: unknown) => {
-    try {
-      // Check if data has the new format with shiftDefinitions
-      if (typeof data === 'object' && data !== null && 
-          'weeklyNeeds' in data && 'shiftDefinitions' in data) {
-        const weeklyNeedsData = data as { weeklyNeeds: WeeklyNeeds, shiftDefinitions: ShiftDefinitions };
-        
-        // Import both weeklyNeeds and shiftDefinitions
-        scheduleStore.setWeeklyNeeds(weeklyNeedsData.weeklyNeeds);
-        scheduleStore.setShiftDefinitions(weeklyNeedsData.shiftDefinitions);
-        
-        const daysCount = Object.keys(weeklyNeedsData.weeklyNeeds).length;
-        const details = Object.entries(weeklyNeedsData.weeklyNeeds).map(([day, shifts]) => {
-          const shiftsCount = Object.keys(shifts).length;
-          return `${day}: ${shiftsCount} shifts configured`;
-        });
-        details.push(`Shift definitions updated: AM (${weeklyNeedsData.shiftDefinitions.HALF_DAY_AM.start}-${weeklyNeedsData.shiftDefinitions.HALF_DAY_AM.end}), PM (${weeklyNeedsData.shiftDefinitions.HALF_DAY_PM.start}-${weeklyNeedsData.shiftDefinitions.HALF_DAY_PM.end})`);
-        
-        scheduleStore.showMessage(
-          'success',
-          'Weekly Needs Import Successful',
-          `Successfully imported weekly needs for ${daysCount} days and shift definitions`,
-          details
-        );
-        logger.log("Weekly needs data with shift definitions imported successfully:", data);
-      } else if (typeof data === 'object' && data !== null) {
-        // Legacy format - just weekly needs object
-        const weeklyNeeds = data as WeeklyNeeds;
-        scheduleStore.setWeeklyNeeds(weeklyNeeds);
-        const daysCount = Object.keys(weeklyNeeds).length;
-        const details = Object.entries(weeklyNeeds).map(([day, shifts]) => {
-          const shiftsCount = Object.keys(shifts).length;
-          return `${day}: ${shiftsCount} shifts configured`;
-        });
-        scheduleStore.showMessage(
-          'success',
-          'Weekly Needs Import Successful',
-          `Successfully imported weekly needs for ${daysCount} days`,
-          details
-        );
-        logger.log("Weekly needs data imported successfully:", data);
-      } else {
-        throw new Error('Invalid weekly needs data format');
-      }
-    } catch (error) {
-      scheduleStore.showMessage(
-        'error',
-        'Weekly Needs Import Failed',
-        'Failed to import weekly needs data. Please check the format.',
-        [error instanceof Error ? error.message : 'Unknown error occurred']
-      );
-      logger.error("Import error:", error);
-    }
-  }, [scheduleStore]);
-
-  // --- Export Handlers for Individual Components ---
-  const handleExportSuccess = (fileName: string, dataType: string) => {
-    scheduleStore.showMessage(
-      'success',
-      'Export Successful',
-      `${dataType} data exported successfully.`,
-      [`File saved as: ${fileName}`]
-    );
-  };
-
-  const handleExportError = (error: string) => {
-    scheduleStore.showMessage(
-      'error',
-      'Export Failed',
-      'Failed to export data.',
-      [error]
-    );
-  };
-
-  const handleNoDataToExport = (dataType: string) => {
-    scheduleStore.showMessage(
-      'warning',
-      'Export Failed',
-      `No ${dataType} data available to export.`,
-      [`Please add some ${dataType.toLowerCase()} data first.`]
-    );
-  };
 
   // --- Universal Import Handler (supports both bulk and individual data) ---
   const handleUniversalImport = () => {
@@ -255,90 +106,25 @@ function App() {
 
         const rawData = JSON.parse(result);
         
-        // 檢測數據格式類型
-        const isBulkFormat = Object.prototype.hasOwnProperty.call(rawData, 'staffList') || 
-                            Object.prototype.hasOwnProperty.call(rawData, 'unavailabilityList') || 
-                            Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds');
+        // Only support bulk format - validate and import
+        const validation = validateBulkImportData(rawData);
         
-        const isStaffManagementObject = !Array.isArray(rawData) && typeof rawData === 'object' &&
-                                        Object.prototype.hasOwnProperty.call(rawData, 'staffList') && 
-                                        Object.prototype.hasOwnProperty.call(rawData, 'definedRoles');
-        
-        const isStaffArray = Array.isArray(rawData) && rawData.length > 0 && 
-                            Object.prototype.hasOwnProperty.call(rawData[0], 'id') && Object.prototype.hasOwnProperty.call(rawData[0], 'name');
-        
-        const isUnavailabilityArray = Array.isArray(rawData) && rawData.length > 0 && 
-                                     Object.prototype.hasOwnProperty.call(rawData[0], 'employeeId') && Object.prototype.hasOwnProperty.call(rawData[0], 'dayOfWeek');
-        
-        const isWeeklyNeedsManagementObject = !Array.isArray(rawData) && typeof rawData === 'object' &&
-                                             Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds') && 
-                                             Object.prototype.hasOwnProperty.call(rawData, 'shiftDefinitions');
-        
-        const isWeeklyNeedsObject = !Array.isArray(rawData) && typeof rawData === 'object' && 
-                                   Object.keys(rawData).some(key => 
-                                     typeof rawData[key] === 'object' && 
-                                     Object.keys(rawData[key]).some(shiftKey => 
-                                       typeof rawData[key][shiftKey] === 'object'
-                                     )
-                                   );
+        if (validation.isValid) {
+          const relationshipWarnings = validateDataRelationships(validation.data);
+          validation.warnings.push(...relationshipWarnings);
+        }
 
-        if (isBulkFormat) {
-          // Bulk format - use existing bulk import logic
-          const validation = validateBulkImportData(rawData);
-          
-          if (validation.isValid) {
-            const relationshipWarnings = validateDataRelationships(validation.data);
-            validation.warnings.push(...relationshipWarnings);
-          }
-
-          if (!validation.isValid) {
-            scheduleStore.showMessage(
-              'error',
-              'Import Failed', 
-              'Invalid bulk data format in JSON file.',
-              validation.errors
-            );
-            return;
-          }
-
-          handleBulkImport(validation.data, 'replace');
-          
-        } else if (isStaffManagementObject) {
-          // Staff Management format (with definedRoles)
-          handleImportStaffData(rawData);
-          
-        } else if (isStaffArray) {
-          // Individual Staff format (legacy)
-          handleImportStaffData(rawData);
-          
-        } else if (isUnavailabilityArray) {
-          // Individual Unavailability format
-          handleImportUnavailabilityData(rawData);
-          
-        } else if (isWeeklyNeedsManagementObject) {
-          // Weekly Needs Management format (with shiftDefinitions)
-          handleImportNeedsData(rawData);
-          
-        } else if (isWeeklyNeedsObject) {
-          // Individual Weekly Needs format (legacy)
-          handleImportNeedsData(rawData);
-          
-        } else {
+        if (!validation.isValid) {
           scheduleStore.showMessage(
             'error',
-            'Import Failed',
-            'Unrecognized JSON format.',
-            [
-              'Supported formats:',
-              '• Bulk data (exported from "Export All Data")',
-              '• Staff management data (staff list + roles, exported from Staff tab)',
-              '• Staff array (legacy format)',
-              '• Unavailability array (exported from Unavailability tab)',
-              '• Weekly needs data (needs + shift definitions, exported from Needs tab)',
-              '• Weekly needs object (legacy format)'
-            ]
+            'Import Failed', 
+            'Invalid bulk data format in JSON file.',
+            validation.errors
           );
+          return;
         }
+
+        handleBulkImport(validation.data, 'replace');
 
       } catch (error) {
         scheduleStore.showMessage(
@@ -371,9 +157,15 @@ function App() {
       const bulkData: BulkImportData = {};
       let hasData = false;
 
-      // 只導出有數據的部分
+      // Export only parts with data
       if (staffStore.staffList.length > 0) {
         bulkData.staffList = staffStore.staffList;
+        hasData = true;
+      }
+
+      // Always export definedRoles if they exist (even if no staff)
+      if (staffStore.definedRoles.length > 0) {
+        bulkData.definedRoles = staffStore.definedRoles;
         hasData = true;
       }
 
@@ -387,23 +179,29 @@ function App() {
         hasData = true;
       }
 
+      // Always export shiftDefinitions if they exist
+      if (scheduleStore.shiftDefinitions) {
+        bulkData.shiftDefinitions = scheduleStore.shiftDefinitions;
+        hasData = true;
+      }
+
       if (!hasData) {
         scheduleStore.showMessage(
           'warning',
           'Export Failed',
           'No data available to export.',
-          ['Please add some staff, unavailability, or weekly needs data first.']
+          ['Please add some staff, unavailability, weekly needs, or configuration data first.']
         );
         return;
       }
 
-      // 生成檔案名稱包含日期時間
+      // Generate filename with date and time
       const now = new Date();
       const dateString = now.toISOString().split('T')[0]; // YYYY-MM-DD
       const timeString = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
       const fileName = `restaurant_scheduler_data_${dateString}_${timeString}.json`;
 
-      // 創建和下載檔案
+      // Create and download file
       const jsonString = JSON.stringify(bulkData, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -415,14 +213,16 @@ function App() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      // 生成導出摘要
+      // Generate export summary
       const exportSummary: string[] = [];
       if (bulkData.staffList) exportSummary.push(`${bulkData.staffList.length} staff members`);
+      if (bulkData.definedRoles) exportSummary.push(`${bulkData.definedRoles.length} defined roles`);
       if (bulkData.unavailabilityList) exportSummary.push(`${bulkData.unavailabilityList.length} unavailability entries`);
       if (bulkData.weeklyNeeds) {
         const daysCount = Object.keys(bulkData.weeklyNeeds).length;
         exportSummary.push(`weekly needs for ${daysCount} days`);
       }
+      if (bulkData.shiftDefinitions) exportSummary.push('shift definitions');
 
       scheduleStore.showMessage(
         'success',
@@ -469,6 +269,19 @@ function App() {
           staffStore.setStaffList(mergedStaff);
         }
         importSummary.push(`${data.staffList.length} staff members`);
+      }
+
+      // Import defined roles
+      if (data.definedRoles) {
+        if (updateMode === 'replace') {
+          staffStore.setDefinedRoles(data.definedRoles);
+        } else {
+          // Merge mode: combine with existing roles
+          const existingRoles = staffStore.definedRoles;
+          const mergedRoles = [...new Set([...existingRoles, ...data.definedRoles])];
+          staffStore.setDefinedRoles(mergedRoles);
+        }
+        importSummary.push(`${data.definedRoles.length} defined roles`);
       }
 
       // Import unavailability data
@@ -524,6 +337,12 @@ function App() {
         importSummary.push(`weekly needs for ${daysCount} days`);
       }
 
+      // Import shift definitions
+      if (data.shiftDefinitions) {
+        scheduleStore.setShiftDefinitions(data.shiftDefinitions);
+        importSummary.push('shift definitions');
+      }
+
       const modeText = updateMode === 'replace' ? 'imported and replaced' : 'imported and merged';
       scheduleStore.showMessage(
         'success',
@@ -565,79 +384,25 @@ function App() {
 
         const rawData = JSON.parse(result);
         
-        // Use the same detection logic as universal import
-        const isBulkFormat = Object.prototype.hasOwnProperty.call(rawData, 'staffList') || 
-                            Object.prototype.hasOwnProperty.call(rawData, 'unavailabilityList') || 
-                            Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds');
+        // Only support bulk format - validate and import
+        const validation = validateBulkImportData(rawData);
         
-        const isStaffManagementObject = !Array.isArray(rawData) && typeof rawData === 'object' &&
-                                        Object.prototype.hasOwnProperty.call(rawData, 'staffList') && 
-                                        Object.prototype.hasOwnProperty.call(rawData, 'definedRoles');
-        
-        const isStaffArray = Array.isArray(rawData) && rawData.length > 0 && 
-                            Object.prototype.hasOwnProperty.call(rawData[0], 'id') && Object.prototype.hasOwnProperty.call(rawData[0], 'name');
-        
-        const isUnavailabilityArray = Array.isArray(rawData) && rawData.length > 0 && 
-                                     Object.prototype.hasOwnProperty.call(rawData[0], 'employeeId') && Object.prototype.hasOwnProperty.call(rawData[0], 'dayOfWeek');
-        
-        const isWeeklyNeedsManagementObject = !Array.isArray(rawData) && typeof rawData === 'object' &&
-                                             Object.prototype.hasOwnProperty.call(rawData, 'weeklyNeeds') && 
-                                             Object.prototype.hasOwnProperty.call(rawData, 'shiftDefinitions');
-        
-        const isWeeklyNeedsObject = !Array.isArray(rawData) && typeof rawData === 'object' && 
-                                   Object.keys(rawData).some(key => 
-                                     typeof rawData[key] === 'object' && 
-                                     Object.keys(rawData[key]).some(shiftKey => 
-                                       typeof rawData[key][shiftKey] === 'object'
-                                     )
-                                   );
+        if (validation.isValid) {
+          const relationshipWarnings = validateDataRelationships(validation.data);
+          validation.warnings.push(...relationshipWarnings);
+        }
 
-        if (isBulkFormat) {
-          const validation = validateBulkImportData(rawData);
-          
-          if (validation.isValid) {
-            const relationshipWarnings = validateDataRelationships(validation.data);
-            validation.warnings.push(...relationshipWarnings);
-          }
-
-          if (!validation.isValid) {
-            scheduleStore.showMessage(
-              'error',
-              'Drag & Drop Import Failed', 
-              'Invalid bulk data format in JSON file.',
-              validation.errors
-            );
-            return;
-          }
-
-          handleBulkImport(validation.data, 'replace');
-          
-        } else if (isStaffManagementObject) {
-          handleImportStaffData(rawData);
-        } else if (isStaffArray) {
-          handleImportStaffData(rawData);
-        } else if (isUnavailabilityArray) {
-          handleImportUnavailabilityData(rawData);
-        } else if (isWeeklyNeedsManagementObject) {
-          handleImportNeedsData(rawData);
-        } else if (isWeeklyNeedsObject) {
-          handleImportNeedsData(rawData);
-        } else {
+        if (!validation.isValid) {
           scheduleStore.showMessage(
             'error',
-            'Drag & Drop Import Failed',
-            'Unable to recognize the JSON data format.',
-            [
-              'Supported formats:',
-              '• Bulk data export (containing staffList, unavailabilityList, or weeklyNeeds)',
-              '• Staff management data (staff list + roles)',
-              '• Staff array with id and name fields (legacy)',
-              '• Unavailability array with employeeId and dayOfWeek fields',
-              '• Weekly needs data (needs + shift definitions)',
-              '• Weekly needs object with day/shift/role structure (legacy)'
-            ]
+            'Drag & Drop Import Failed', 
+            'Invalid bulk data format in JSON file.',
+            validation.errors
           );
+          return;
         }
+
+        handleBulkImport(validation.data, 'replace');
 
         logger.log('File imported via drag & drop:', file.name);
         
@@ -661,7 +426,7 @@ function App() {
     };
 
     reader.readAsText(file);
-  }, [scheduleStore, handleImportStaffData, handleImportUnavailabilityData, handleImportNeedsData, handleBulkImport]);
+  }, [scheduleStore, handleBulkImport]);
 
   // --- Setup Full Page Drag & Drop Event Listeners ---
   useEffect(() => {
@@ -844,9 +609,6 @@ function App() {
                 onAddStaff={handleAddStaff}
                 onDeleteStaff={handleDeleteStaff}
                 onReorderStaff={staffStore.reorderStaff}
-                onExportSuccess={handleExportSuccess}
-                onExportError={handleExportError}
-                onNoDataToExport={handleNoDataToExport}
               />
             </TabPanel>
 
@@ -857,9 +619,6 @@ function App() {
                 unavailabilityList={unavailabilityStore.unavailabilityList}
                 onAddUnavailability={handleAddUnavailability}
                 onDeleteUnavailability={unavailabilityStore.deleteUnavailability}
-                onExportSuccess={handleExportSuccess}
-                onExportError={handleExportError}
-                onNoDataToExport={handleNoDataToExport}
               />
             </TabPanel>
 
@@ -871,9 +630,6 @@ function App() {
                 shiftDefinitions={scheduleStore.shiftDefinitions}
                 onUpdateNeeds={scheduleStore.updateWeeklyNeeds}
                 onUpdateShiftDefinitions={scheduleStore.setShiftDefinitions}
-                onExportSuccess={handleExportSuccess}
-                onExportError={handleExportError}
-                onNoDataToExport={handleNoDataToExport}
               />
             </TabPanel>
 
@@ -945,10 +701,13 @@ function App() {
         {/* History Panel */}
         <HistoryPanel
           staffList={staffStore.staffList}
+          definedRoles={staffStore.definedRoles}
           unavailabilityList={unavailabilityStore.unavailabilityList}
           weeklyNeeds={scheduleStore.weeklyNeeds}
           shiftDefinitions={scheduleStore.shiftDefinitions}
           generatedSchedule={scheduleStore.schedule}
+          shiftPreference={scheduleStore.shiftPreference}
+          warnings={scheduleStore.warnings}
           isOpen={isHistoryOpen}
           onClose={() => setIsHistoryOpen(false)}
         />

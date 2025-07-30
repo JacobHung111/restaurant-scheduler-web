@@ -21,20 +21,26 @@ import type { StaffMember, Unavailability, WeeklyNeeds, Schedule, ShiftDefinitio
 
 interface HistoryPanelProps {
   staffList: StaffMember[];
+  definedRoles: string[];
   unavailabilityList: Unavailability[];
   weeklyNeeds: WeeklyNeeds;
   shiftDefinitions: ShiftDefinitions;
   generatedSchedule: Schedule | null;
+  shiftPreference: 'PRIORITIZE_FULL_DAYS' | 'PRIORITIZE_HALF_DAYS' | 'NONE';
+  warnings: string[];
   isOpen: boolean;
   onClose: () => void;
 }
 
 function HistoryPanel({
   staffList,
+  definedRoles,
   unavailabilityList,
   weeklyNeeds,
   shiftDefinitions,
   generatedSchedule,
+  shiftPreference,
+  warnings,
   isOpen,
   onClose
 }: HistoryPanelProps) {
@@ -85,11 +91,13 @@ function HistoryPanel({
     }))
   );
 
-  const { setWeeklyNeeds, setGeneratedSchedule, setShiftDefinitions, showMessage } = useScheduleStore(
+  const { setWeeklyNeeds, setGeneratedSchedule, setShiftDefinitions, setShiftPreference, setWarnings, showMessage } = useScheduleStore(
     useShallow((state) => ({
       setWeeklyNeeds: state.setWeeklyNeeds,
       setGeneratedSchedule: state.setGeneratedSchedule,
       setShiftDefinitions: state.setShiftDefinitions,
+      setShiftPreference: state.setShiftPreference,
+      setWarnings: state.setWarnings,
       showMessage: state.showMessage,
     }))
   );
@@ -102,10 +110,13 @@ function HistoryPanel({
     
     const result = saveRecord(
       staffList,
+      definedRoles,
       unavailabilityList,
       weeklyNeeds,
       shiftDefinitions,
-      generatedSchedule
+      generatedSchedule,
+      shiftPreference,
+      warnings
     );
 
     if (result.success) {
@@ -141,18 +152,22 @@ function HistoryPanel({
     if (result.success && result.record) {
       const { data } = result.record;
       
-      // 載入所有數據到對應的 stores
+      // Load all data into corresponding stores
       setStaffList(data.staffList);
       setUnavailabilityList(data.unavailabilityList);
       setWeeklyNeeds(data.weeklyNeeds);
       setShiftDefinitions(data.shiftDefinitions);
       setGeneratedSchedule(data.generatedSchedule);
       
-      // 更新定義的角色
-      const allRoles = [...new Set(
+      // Load defined roles (backward compatibility)
+      const definedRolesToLoad = data.definedRoles || [...new Set(
         data.staffList.flatMap(staff => staff.assignedRolesInPriority)
       )];
-      setDefinedRoles(allRoles);
+      setDefinedRoles(definedRolesToLoad);
+      
+      // Load schedule preferences and warnings (backward compatibility)
+      setShiftPreference(data.shiftPreference || 'NONE');
+      setWarnings(data.warnings || []);
 
       showMessage('success', t('history.recordLoaded'), t('history.recordLoadedSuccess', { name: result.record.name }));
       logger.log('History record loaded:', result.record.name);

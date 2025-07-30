@@ -1,7 +1,7 @@
 // src/components/UnavailabilityForm.tsx
 import React, { useState } from "react";
 import { useTranslation } from 'react-i18next';
-import type { StaffMember, Unavailability, ShiftTime } from "../types";
+import type { StaffMember, Unavailability } from "../types";
 import { DAYS_OF_WEEK } from "../config";
 import { useScheduleStore } from "../stores/useScheduleStore";
 import { useShallow } from 'zustand/react/shallow';
@@ -17,7 +17,7 @@ function UnavailabilityForm({
   const { t } = useTranslation();
   const [selectedStaffId, setSelectedStaffId] = useState<string>("");
   const [selectedDay, setSelectedDay] = useState<string>("");
-  const [selectedShifts, setSelectedShifts] = useState<ShiftTime[]>([]);
+  const [selectedShifts, setSelectedShifts] = useState<('AM' | 'PM')[]>([]);
   
   const { shiftDefinitions, showMessage } = useScheduleStore(
     useShallow((state) => ({
@@ -26,25 +26,21 @@ function UnavailabilityForm({
     }))
   );
 
-  // Generate shift options from current shift definitions - only AM/PM, no full day
-  const getUnavailableShiftOptions = (): ShiftTime[] => [
-    { start: shiftDefinitions.HALF_DAY_AM.start, end: shiftDefinitions.HALF_DAY_AM.end },
-    { start: shiftDefinitions.HALF_DAY_PM.start, end: shiftDefinitions.HALF_DAY_PM.end },
-  ];
+  // Generate shift options - only AM/PM, no full day
+  const getUnavailableShiftOptions = (): ('AM' | 'PM')[] => ['AM', 'PM'];
 
-  const getUnavailableShiftLabel = (shift: ShiftTime): string => {
-    return `${shift.start} - ${shift.end}`;
+  const getUnavailableShiftLabel = (shift: 'AM' | 'PM'): string => {
+    const shiftDef = shift === 'AM' ? shiftDefinitions.HALF_DAY_AM : shiftDefinitions.HALF_DAY_PM;
+    return `${shift} (${shiftDef.start} - ${shiftDef.end})`;
   };
 
   const handleShiftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
-    const [start, end] = value.split("-");
-    if (!start || !end) return;
-    const shiftObj = { start, end };
+    const shiftType = value as 'AM' | 'PM';
     setSelectedShifts((prevShifts) =>
       checked
-        ? [...prevShifts, shiftObj]
-        : prevShifts.filter((s) => !(s.start === start && s.end === end))
+        ? [...prevShifts, shiftType]
+        : prevShifts.filter((s) => s !== shiftType)
     );
   };
 
@@ -137,24 +133,20 @@ function UnavailabilityForm({
           </label>
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             {getUnavailableShiftOptions().map((shiftOpt) => {
-              const shiftValue = `${shiftOpt.start}-${shiftOpt.end}`;
               const shiftLabel = getUnavailableShiftLabel(shiftOpt);
               return (
-                <div key={shiftValue} className="flex items-center">
+                <div key={shiftOpt} className="flex items-center">
                   <input
                     type="checkbox"
-                    id={`unav-${shiftValue}-form`}
+                    id={`unav-${shiftOpt}-form`}
                     name="unav-shift-form"
-                    value={shiftValue}
-                    checked={selectedShifts.some(
-                      (s) =>
-                        s.start === shiftOpt.start && s.end === shiftOpt.end
-                    )}
+                    value={shiftOpt}
+                    checked={selectedShifts.includes(shiftOpt)}
                     onChange={handleShiftChange}
                     className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-indigo-600 dark:text-blue-500 focus:ring-indigo-500 dark:focus:ring-blue-400 dark:bg-slate-700"
                   />
                   <label
-                    htmlFor={`unav-${shiftValue}-form`}
+                    htmlFor={`unav-${shiftOpt}-form`}
                     className="ml-2 block text-sm text-gray-900 dark:text-slate-200"
                   >
                     {shiftLabel}

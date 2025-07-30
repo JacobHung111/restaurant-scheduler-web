@@ -16,14 +16,6 @@ interface NeedsPanelProps {
     count: number
   ) => void;
   onUpdateShiftDefinitions: (newDefinitions: ShiftDefinitions) => void;
-  onExportSuccess?: (fileName: string, dataType: string) => void;
-  onExportError?: (error: string) => void;
-  onNoDataToExport?: (dataType: string) => void;
-}
-
-interface WeeklyNeedsExportData {
-  weeklyNeeds: WeeklyNeeds;
-  shiftDefinitions: ShiftDefinitions;
 }
 
 // Use functions from utils.ts for consistency
@@ -223,61 +215,13 @@ function NeedsPanel({
   shiftDefinitions,
   onUpdateNeeds,
   onUpdateShiftDefinitions,
-  onExportSuccess,
-  onExportError,
-  onNoDataToExport,
 }: NeedsPanelProps) {
   const { t } = useTranslation();
-  
-  // Create export data that includes both weeklyNeeds and shiftDefinitions
-  const exportData: WeeklyNeedsExportData = {
-    weeklyNeeds,
-    shiftDefinitions,
-  };
-
-  // Check if there's data to export
-  const hasDataToExport = Object.keys(weeklyNeeds).length > 0 || shiftDefinitions;
-
-  const handleExport = () => {
-    if (!hasDataToExport) {
-      onNoDataToExport?.(t('needs.weeklyNeeds'));
-      return;
-    }
-
-    try {
-      const jsonString = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const fileName = `${t('needs.weeklyNeeds')
-        .toLowerCase()
-        .replace(/\s+/g, "_")}_data.json`;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      onExportSuccess?.(fileName, t('needs.weeklyNeeds'));
-    } catch (error) {
-      onExportError?.(error instanceof Error ? error.message : 'Unknown export error');
-    }
-  };
   
   return (
     <div className="p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
       <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-slate-100">{t('needs.weeklyNeeds')}</h2>
       
-      {/* Custom export button */}
-      <div className="io-buttons border-b border-gray-200 dark:border-slate-600 pb-4 mb-4 flex gap-3 flex-wrap items-center">
-        <button
-          type="button"
-          onClick={handleExport}
-          className="px-4 py-2 text-sm font-medium rounded-lg shadow-sm text-white bg-gray-600 dark:bg-slate-600 hover:bg-gray-700 dark:hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-slate-400 transition-all duration-200"
-        >
-          {t('importExport.export', { dataType: t('needs.weeklyNeeds') })}
-        </button>
-      </div>
 
       {/* Integrated Shift Definition Editor */}
       <ShiftDefinitionEditor
